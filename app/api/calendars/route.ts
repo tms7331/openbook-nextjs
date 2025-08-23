@@ -4,17 +4,27 @@ import { getCalendarClient, getAuthMethod } from '@/lib/google-calendar';
 export async function GET() {
   try {
     console.log('GET /api/calendars - Starting');
-    const authMethod = await getAuthMethod();
-    console.log('Auth method:', authMethod);
     
-    const calendar = await getCalendarClient();
-    console.log('Calendar client created');
+    // ALWAYS use service account to list calendars
+    const fs = require('fs');
+    const path = require('path');
+    const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
+    const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+    
+    const { google } = require('googleapis');
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/calendar'],
+    });
+    const calendar = google.calendar({ version: 'v3', auth });
+    
+    console.log('Using service account to list calendars');
     
     const response = await calendar.calendarList.list();
     console.log('Calendar list response:', response.data);
     
     return NextResponse.json({
-      authMethod,
+      authMethod: 'service-account',
       calendars: response.data.items || []
     });
   } catch (error: any) {

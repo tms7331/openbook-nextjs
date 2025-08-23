@@ -6,7 +6,20 @@ import { authOptions } from '@/lib/auth';
 export async function GET(request: Request) {
   try {
     console.log('GET /api/bookings - Starting');
-    const calendar = await getCalendarClient();
+    
+    // ALWAYS use service account to list events
+    const fs = require('fs');
+    const path = require('path');
+    const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
+    const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+    
+    const { google } = require('googleapis');
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/calendar'],
+    });
+    const calendar = google.calendar({ version: 'v3', auth });
+    
     const { searchParams } = new URL(request.url);
     const calendarId = searchParams.get('calendarId');
     
