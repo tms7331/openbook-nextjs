@@ -40,15 +40,21 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     console.log('POST /api/calendars - Starting');
-    const authMethod = await getAuthMethod();
-    console.log('Auth method:', authMethod);
     
-    if (authMethod !== 'service-account') {
-      return NextResponse.json({ error: 'Only service account can create calendars' }, { status: 403 });
-    }
+    // ALWAYS use service account to create calendars
+    const fs = require('fs');
+    const path = require('path');
+    const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
+    const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
     
-    const calendar = await getCalendarClient();
-    console.log('Calendar client created');
+    const { google } = require('googleapis');
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/calendar'],
+    });
+    const calendar = google.calendar({ version: 'v3', auth });
+    
+    console.log('Using service account to create calendar');
     
     const body = await request.json();
     console.log('Request body:', body);

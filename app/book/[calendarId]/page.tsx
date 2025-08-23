@@ -15,13 +15,25 @@ export default function BookingPage({ params }: Props) {
   const [view, setView] = useState<CalendarView>('week');
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authStatus, setAuthStatus] = useState<any>(null);
 
   useEffect(() => {
     params.then(p => {
       setCalendarId(p.calendarId);
       fetchEvents(p.calendarId);
     });
+    checkAuthStatus();
   }, [params]);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth-status');
+      const data = await response.json();
+      setAuthStatus(data);
+    } catch (error) {
+      console.error('Failed to check auth status:', error);
+    }
+  };
 
   const fetchEvents = async (id: string) => {
     try {
@@ -85,7 +97,24 @@ export default function BookingPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-      <h1 style={{ marginBottom: '1rem' }}>Book a Time Slot</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h1>Book a Time Slot</h1>
+        {authStatus && (
+          <div style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: authStatus.authenticated ? '#e8f5e9' : '#fff3cd',
+            border: `1px solid ${authStatus.authenticated ? '#c8e6c9' : '#ffc107'}`,
+            borderRadius: '8px',
+            fontSize: '14px'
+          }}>
+            {authStatus.authenticated ? (
+              <>✓ Signed in as {authStatus.user?.email}</>
+            ) : (
+              <>Not signed in (using service account)</>
+            )}
+          </div>
+        )}
+      </div>
       <p style={{ marginBottom: '2rem', color: '#666' }}>
         Calendar ID: {calendarId}
       </p>

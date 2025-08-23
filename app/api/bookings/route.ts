@@ -57,6 +57,12 @@ export async function POST(request: Request) {
     console.log('Session:', session ? 'exists' : 'none');
     
     const body = await request.json();
+    
+    // Fix URL-encoded calendar ID
+    if (body.calendarId) {
+      body.calendarId = decodeURIComponent(body.calendarId);
+    }
+    
     console.log('Request body:', JSON.stringify(body, null, 2));
     
     if (!body.calendarId) {
@@ -68,6 +74,8 @@ export async function POST(request: Request) {
     // If user is logged in with OAuth, create event on BOTH calendars
     if (authMethod === 'oauth' && body.addToPersonalCalendar !== false) {
       console.log('OAuth user - will create events on both calendars');
+      console.log('Session user email:', session?.user?.email);
+      console.log('Session access token exists:', !!session?.accessToken);
       
       // 1. First, create on user's personal calendar
       try {
@@ -77,10 +85,17 @@ export async function POST(request: Request) {
           description: `Room: ${body.calendarId}\n${body.description || ''}`,
           start: { dateTime: body.startTime },
           end: { dateTime: body.endTime },
-          attendees: body.attendees?.map((email: string) => ({ email })) || []
+          attendees: [
+            // Add the organizer email if provided (they'll get an invite)
+            ...(body.organizerEmail ? [{ email: body.organizerEmail }] : []),
+            // Add any additional attendees
+            ...(body.attendees?.map((email: string) => ({ email })) || [])
+          ]
         };
         
         console.log('Creating event on personal calendar');
+        console.log('Personal event object:', JSON.stringify(personalEvent, null, 2));
+        
         const personalResult = await oauthCalendar.events.insert({
           calendarId: 'primary', // User's primary calendar
           requestBody: personalEvent,
@@ -91,6 +106,8 @@ export async function POST(request: Request) {
         console.log('Personal calendar event created:', personalResult.data.id);
       } catch (error: any) {
         console.error('Failed to create personal calendar event:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        console.error('Error code:', error.code);
       }
       
       // 2. Then create on room calendar using service account
@@ -99,7 +116,9 @@ export async function POST(request: Request) {
         const fs = require('fs');
         const path = require('path');
         const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
+        console.log('Loading service account from:', keyFilePath);
         const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+        console.log('Service account email:', credentials.client_email);
         
         const { google } = require('googleapis');
         const auth = new google.auth.GoogleAuth({
@@ -116,6 +135,9 @@ export async function POST(request: Request) {
         };
         
         console.log('Creating event on room calendar with service account');
+        console.log('Room calendar ID:', body.calendarId);
+        console.log('Room event object:', JSON.stringify(roomEvent, null, 2));
+        
         const roomResult = await serviceCalendar.events.insert({
           calendarId: body.calendarId,
           requestBody: roomEvent
@@ -125,9 +147,12 @@ export async function POST(request: Request) {
         console.log('Room calendar event created:', roomResult.data.id);
       } catch (error: any) {
         console.error('Failed to create room calendar event:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        console.error('Error code:', error.code);
         return NextResponse.json({ 
-          error: 'Failed to book room. Make sure the calendar is shared with: ' + session?.user?.email,
-          details: error.message
+          error: 'Failed to book room. Calendar ID may be invalid or not accessible.',
+          details: error.message,
+          calendarId: body.calendarId
         }, { status: 500 });
       }
       
