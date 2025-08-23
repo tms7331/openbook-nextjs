@@ -8,10 +8,11 @@ export async function GET(request: Request) {
     console.log('GET /api/bookings - Starting');
     
     // ALWAYS use service account to list events
-    const fs = require('fs');
-    const path = require('path');
-    const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
-    const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+    const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountKey) {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+    }
+    const credentials = JSON.parse(serviceAccountKey);
     
     const { google } = require('googleapis');
     const auth = new google.auth.GoogleAuth({
@@ -113,11 +114,11 @@ export async function POST(request: Request) {
       // 2. Then create on room calendar using service account
       try {
         // Force service account for room calendar
-        const fs = require('fs');
-        const path = require('path');
-        const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
-        console.log('Loading service account from:', keyFilePath);
-        const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+        const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+        if (!serviceAccountKey) {
+          throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+        }
+        const credentials = JSON.parse(serviceAccountKey);
         console.log('Service account email:', credentials.client_email);
         
         const { google } = require('googleapis');

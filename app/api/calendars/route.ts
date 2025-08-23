@@ -6,10 +6,25 @@ export async function GET() {
     console.log('GET /api/calendars - Starting');
     
     // ALWAYS use service account to list calendars
-    const fs = require('fs');
-    const path = require('path');
-    const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
-    const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+    const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountKey) {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+    }
+    
+    // Debug: Check if the key looks correct
+    console.log('Service account key length:', serviceAccountKey.length);
+    console.log('First 100 chars:', serviceAccountKey.substring(0, 100));
+    
+    let credentials;
+    try {
+      credentials = JSON.parse(serviceAccountKey);
+      console.log('Parsed credentials type:', credentials.type);
+      console.log('Has private_key:', !!credentials.private_key);
+      console.log('Private key starts with:', credentials.private_key?.substring(0, 50));
+    } catch (e) {
+      console.error('Failed to parse service account key:', e);
+      throw new Error('Invalid JSON in GOOGLE_SERVICE_ACCOUNT_KEY');
+    }
     
     const { google } = require('googleapis');
     const auth = new google.auth.GoogleAuth({
@@ -42,10 +57,11 @@ export async function POST(request: Request) {
     console.log('POST /api/calendars - Starting');
     
     // ALWAYS use service account to create calendars
-    const fs = require('fs');
-    const path = require('path');
-    const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
-    const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+    const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountKey) {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+    }
+    const credentials = JSON.parse(serviceAccountKey);
     
     const { google } = require('googleapis');
     const auth = new google.auth.GoogleAuth({
