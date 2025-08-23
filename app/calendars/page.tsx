@@ -78,11 +78,11 @@ export default function CalendarsPage() {
               transition: 'all 0.2s',
               cursor: 'pointer'
             }}>
-              <h3 style={{ marginBottom: '0.5rem' }}>{calendar.summary || 'Unnamed Calendar'}</h3>
+              <h3 style={{ marginBottom: '0.5rem', color: '#000' }}>{calendar.summary || 'Unnamed Calendar'}</h3>
               {calendar.description && (
-                <p style={{ color: '#666', marginBottom: '1rem' }}>{calendar.description}</p>
+                <p style={{ color: '#333', marginBottom: '1rem' }}>{calendar.description}</p>
               )}
-              <div style={{ fontSize: '0.85rem', color: '#999', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>
                 ID: {calendar.id}
               </div>
               <Link href={`/book/${calendar.id}`}>

@@ -101,16 +101,18 @@ export default function BookingPage({ params }: Props) {
         <h1>Book a Time Slot</h1>
         {authStatus && (
           <div style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: authStatus.authenticated ? '#e8f5e9' : '#fff3cd',
-            border: `1px solid ${authStatus.authenticated ? '#c8e6c9' : '#ffc107'}`,
+            padding: '0.75rem 1.25rem',
+            backgroundColor: authStatus.authenticated ? '#4CAF50' : '#2196F3',
+            color: 'white',
             borderRadius: '8px',
-            fontSize: '14px'
+            fontSize: '14px',
+            fontWeight: '500',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }}>
             {authStatus.authenticated ? (
               <>✓ Signed in as {authStatus.user?.email}</>
             ) : (
-              <>Not signed in (using service account)</>
+              <>🔒 Not signed in (using service account)</>
             )}
           </div>
         )}

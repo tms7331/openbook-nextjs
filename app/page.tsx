@@ -1,103 +1,143 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+
+export default function HomePage() {
+  const [authStatus, setAuthStatus] = useState<any>(null);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth-status');
+      const data = await response.json();
+      setAuthStatus(data);
+    } catch (error) {
+      console.error('Failed to check auth status:', error);
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div style={{ 
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#f5f5f5'
+    }}>
+      <div style={{
+        textAlign: 'center',
+        padding: '3rem',
+        backgroundColor: 'white',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        maxWidth: '500px',
+        width: '90%'
+      }}>
+        <h1 style={{ 
+          fontSize: '2.5rem', 
+          marginBottom: '1rem',
+          color: '#333'
+        }}>
+          Meeting Room Booking
+        </h1>
+        
+        <p style={{ 
+          fontSize: '1.1rem', 
+          color: '#666',
+          marginBottom: '3rem'
+        }}>
+          Book conference rooms quickly and easily
+        </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          <Link href="/calendars">
+            <button style={{
+              width: '100%',
+              padding: '1rem 2rem',
+              fontSize: '1.1rem',
+              backgroundColor: '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '500',
+              transition: 'background-color 0.2s'
+            }}>
+              📅 View Meeting Rooms
+            </button>
+          </Link>
+
+          {authStatus && !authStatus.authenticated ? (
+            <button 
+              onClick={() => window.location.href = '/api/auth/signin'}
+              style={{
+                width: '100%',
+                padding: '1rem 2rem',
+                fontSize: '1.1rem',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '500',
+                transition: 'background-color 0.2s'
+              }}
+            >
+              🔑 Sign in with Google
+            </button>
+          ) : authStatus?.authenticated ? (
+            <div style={{
+              padding: '1rem',
+              backgroundColor: '#e8f5e9',
+              borderRadius: '8px',
+              color: '#2e7d32'
+            }}>
+              ✓ Signed in as {authStatus.user?.email}
+              <button 
+                onClick={() => window.location.href = '/api/auth/signout'}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  marginTop: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.9rem',
+                  backgroundColor: 'transparent',
+                  color: '#2e7d32',
+                  border: '1px solid #2e7d32',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : null}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div style={{
+          marginTop: '3rem',
+          paddingTop: '2rem',
+          borderTop: '1px solid #e0e0e0'
+        }}>
+          <p style={{ 
+            fontSize: '0.9rem',
+            color: '#999'
+          }}>
+            {authStatus?.authenticated 
+              ? 'Your bookings will appear in your Google Calendar'
+              : 'Sign in to sync bookings with your calendar'}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
