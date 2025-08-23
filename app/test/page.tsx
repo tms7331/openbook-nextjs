@@ -3,10 +3,10 @@
 import { useState } from 'react';
 
 export default function TestPage() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<unknown>(null);
   const [calendarId, setCalendarId] = useState('');
 
-  const apiCall = async (url: string, method = 'GET', body?: any) => {
+  const apiCall = async (url: string, method = 'GET', body?: unknown) => {
     try {
       const response = await fetch(url, {
         method,
@@ -186,7 +186,7 @@ export default function TestPage() {
       <div style={{ backgroundColor: '#fff3cd', padding: '20px', marginTop: '30px', borderRadius: '8px', border: '1px solid #ffc107' }}>
         <h3 style={{ color: '#856404', marginTop: 0 }}>📋 Instructions:</h3>
         <ol style={{ color: '#856404', lineHeight: '1.8' }}>
-          <li>First, check auth status to see if you're logged in</li>
+          <li>First, check auth status to see if you&apos;re logged in</li>
           <li>Create a calendar (only works with service account)</li>
           <li>Copy the calendar ID from the result</li>
           <li>Paste it in the input field above</li>

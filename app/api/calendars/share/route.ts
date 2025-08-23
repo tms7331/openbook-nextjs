@@ -48,11 +48,11 @@ export async function POST(request: Request) {
       message: 'Calendar sharing updated',
       rule: aclRule.data
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in POST /api/calendars/share:', error);
     return NextResponse.json({ 
-      error: error.message || 'Failed to update calendar sharing',
-      details: error.toString()
+      error: (error as Error & {message?: string}).message || 'Failed to update calendar sharing',
+      details: (error as Error).toString()
     }, { status: 500 });
   }
 }

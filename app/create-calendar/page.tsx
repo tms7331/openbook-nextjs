@@ -5,7 +5,7 @@ import { useState } from 'react';
 export default function CreateCalendarPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{id?: string; error?: string} | null>(null);
   const [loading, setLoading] = useState(false);
 
   const createCalendar = async () => {

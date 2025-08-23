@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     }
     const credentials = JSON.parse(serviceAccountKey);
     
-    const { google } = require('googleapis');
+    const { google } = await import('googleapis');
     const auth = new google.auth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/calendar'],
@@ -39,11 +39,11 @@ export async function GET(request: Request) {
     
     console.log('Events found:', response.data.items?.length || 0);
     return NextResponse.json(response.data.items || []);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in GET /api/bookings:', error);
     return NextResponse.json({ 
-      error: error.message || 'Failed to list bookings',
-      details: error.toString()
+      error: (error as Error & {message?: string}).message || 'Failed to list bookings',
+      details: (error as Error).toString()
     }, { status: 500 });
   }
 }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'calendarId is required' }, { status: 400 });
     }
     
-    let results = [];
+    const results = [];
     
     // If user is logged in with OAuth, create event on BOTH calendars
     if (authMethod === 'oauth' && body.addToPersonalCalendar !== false) {
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       // 1. First, create on user's personal calendar
       try {
         const oauthCalendar = await getCalendarClient();
-        const personalEvent: any = {
+        const personalEvent = {
           summary: body.title || 'Room Booking',
           description: `Room: ${body.calendarId}\n${body.description || ''}`,
           start: { dateTime: body.startTime },
@@ -105,10 +105,10 @@ export async function POST(request: Request) {
         
         results.push({ calendar: 'personal', event: personalResult.data });
         console.log('Personal calendar event created:', personalResult.data.id);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to create personal calendar event:', error);
-        console.error('Error details:', error.response?.data || error.message);
-        console.error('Error code:', error.code);
+        console.error('Error details:', (error as Error & {response?: {data?: unknown}; message?: string}).response?.data || (error as Error & {message?: string}).message);
+        console.error('Error code:', (error as Error & {code?: string}).code);
       }
       
       // 2. Then create on room calendar using service account
@@ -121,14 +121,14 @@ export async function POST(request: Request) {
         const credentials = JSON.parse(serviceAccountKey);
         console.log('Service account email:', credentials.client_email);
         
-        const { google } = require('googleapis');
+        const { google } = await import('googleapis');
         const auth = new google.auth.GoogleAuth({
           credentials,
           scopes: ['https://www.googleapis.com/auth/calendar'],
         });
         const serviceCalendar = google.calendar({ version: 'v3', auth });
         
-        const roomEvent: any = {
+        const roomEvent = {
           summary: body.title || 'Room Booked',
           description: `Booked by: ${session?.user?.email || 'Unknown'}\n${body.description || ''}`,
           start: { dateTime: body.startTime },
@@ -146,13 +146,13 @@ export async function POST(request: Request) {
         
         results.push({ calendar: 'room', event: roomResult.data });
         console.log('Room calendar event created:', roomResult.data.id);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to create room calendar event:', error);
-        console.error('Error details:', error.response?.data || error.message);
-        console.error('Error code:', error.code);
+        console.error('Error details:', (error as Error & {response?: {data?: unknown}; message?: string}).response?.data || (error as Error & {message?: string}).message);
+        console.error('Error code:', (error as Error & {code?: string}).code);
         return NextResponse.json({ 
           error: 'Failed to book room. Calendar ID may be invalid or not accessible.',
-          details: error.message,
+          details: (error as Error & {message?: string}).message,
           calendarId: body.calendarId
         }, { status: 500 });
       }
@@ -167,7 +167,7 @@ export async function POST(request: Request) {
       console.log('Service account mode - single booking');
       const calendar = await getCalendarClient();
       
-      const event: any = {
+      const event = {
         summary: body.title || 'Untitled Event',
         description: body.description || '',
         start: { dateTime: body.startTime },
@@ -175,7 +175,7 @@ export async function POST(request: Request) {
       };
       
       // Add organizer info to description
-      let descriptionParts = [];
+      const descriptionParts = [];
       if (body.organizerName) {
         descriptionParts.push(`Booked by: ${body.organizerName}`);
       }
@@ -196,13 +196,13 @@ export async function POST(request: Request) {
       console.log('Event created successfully:', result.data.id);
       return NextResponse.json(result.data);
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in POST /api/bookings:', error);
-    console.error('Error details:', error.response?.data || error.message);
+    console.error('Error details:', (error as Error & {response?: {data?: unknown}; message?: string}).response?.data || (error as Error & {message?: string}).message);
     return NextResponse.json({ 
-      error: error.message || 'Failed to create booking',
-      details: error.toString(),
-      googleError: error.response?.data
+      error: (error as Error & {message?: string}).message || 'Failed to create booking',
+      details: (error as Error).toString(),
+      googleError: (error as Error & {response?: {data?: unknown}}).response?.data
     }, { status: 500 });
   }
 }

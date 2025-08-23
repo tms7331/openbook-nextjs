@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function HomePage() {
-  const [authStatus, setAuthStatus] = useState<any>(null);
+  const [authStatus, setAuthStatus] = useState<{authenticated: boolean; user?: {email: string}} | null>(null);
 
   useEffect(() => {
     checkAuthStatus();

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import CalendarNavigation from '@/newcomponents/CalendarNavigation';
 import CalendarDisplay from '@/newcomponents/CalendarDisplay';
-import { CalendarData, CalendarView, UserDetails } from '@/types/calendar';
+import { CalendarData, CalendarView } from '@/types/calendar';
 
 interface Props {
   params: Promise<{ calendarId: string }>;
@@ -13,9 +13,14 @@ export default function BookingPage({ params }: Props) {
   const [calendarId, setCalendarId] = useState<string>('');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarView>('week');
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Array<{
+    id: string;
+    summary?: string;
+    start?: {dateTime?: string; date?: string};
+    end?: {dateTime?: string; date?: string};
+  }>>([]);
   const [loading, setLoading] = useState(true);
-  const [authStatus, setAuthStatus] = useState<any>(null);
+  const [authStatus, setAuthStatus] = useState<{authenticated: boolean; user?: {email: string}} | null>(null);
 
   useEffect(() => {
     params.then(p => {
@@ -49,33 +54,6 @@ export default function BookingPage({ params }: Props) {
     }
   };
 
-  const handleBooking = async (timeSlot: any, userDetails: UserDetails) => {
-    try {
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          calendarId,
-          title: userDetails.name,
-          startTime: timeSlot.start.toISOString(),
-          endTime: timeSlot.end.toISOString(),
-          organizerName: userDetails.name,
-          organizerEmail: userDetails.email || 'user@example.com',
-          description: userDetails.notes || ''
-        })
-      });
-      
-      const data = await response.json();
-      if (data.id || data.results) {
-        alert('Booking successful!');
-        fetchEvents(calendarId);
-      } else {
-        alert('Booking failed: ' + (data.error || 'Unknown error'));
-      }
-    } catch (error) {
-      alert('Error creating booking: ' + error);
-    }
-  };
 
   const calendarData: CalendarData = {
     id: calendarId,
@@ -84,8 +62,8 @@ export default function BookingPage({ params }: Props) {
     events: events.map(event => ({
       id: event.id,
       title: event.summary || 'Busy',
-      start: new Date(event.start?.dateTime || event.start?.date),
-      end: new Date(event.end?.dateTime || event.end?.date),
+      start: new Date(event.start?.dateTime || event.start?.date || new Date()),
+      end: new Date(event.end?.dateTime || event.end?.date || new Date()),
       type: 'booking' as const
     })),
     timeSlots: []
@@ -141,7 +119,6 @@ export default function BookingPage({ params }: Props) {
             calendarData={calendarData}
             currentDate={currentDate}
             view={view}
-            onBooking={handleBooking}
           />
         </div>
       </div>
@@ -153,13 +130,11 @@ export default function BookingPage({ params }: Props) {
 function CalendarDisplayWrapper({ 
   calendarData, 
   currentDate, 
-  view, 
-  onBooking 
+  view
 }: { 
   calendarData: CalendarData;
   currentDate: Date;
   view: CalendarView;
-  onBooking: (timeSlot: any, userDetails: UserDetails) => void;
 }) {
   return (
     <CalendarDisplay

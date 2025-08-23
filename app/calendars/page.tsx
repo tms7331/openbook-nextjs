@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function CalendarsPage() {
-  const [calendars, setCalendars] = useState<any[]>([]);
+  const [calendars, setCalendars] = useState<Array<{id: string; summary?: string; description?: string}>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

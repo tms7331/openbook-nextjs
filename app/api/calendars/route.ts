@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getCalendarClient, getAuthMethod } from '@/lib/google-calendar';
 
 export async function GET() {
   try {
@@ -26,7 +25,7 @@ export async function GET() {
       throw new Error('Invalid JSON in GOOGLE_SERVICE_ACCOUNT_KEY');
     }
     
-    const { google } = require('googleapis');
+    const { google } = await import('googleapis');
     const auth = new google.auth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/calendar'],
@@ -42,12 +41,12 @@ export async function GET() {
       authMethod: 'service-account',
       calendars: response.data.items || []
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in GET /api/calendars:', error);
     return NextResponse.json({ 
-      error: error.message || 'Failed to list calendars',
-      details: error.toString(),
-      stack: error.stack
+      error: (error as Error & {message?: string}).message || 'Failed to list calendars',
+      details: (error as Error).toString(),
+      stack: (error as Error & {stack?: string}).stack
     }, { status: 500 });
   }
 }
@@ -63,7 +62,7 @@ export async function POST(request: Request) {
     }
     const credentials = JSON.parse(serviceAccountKey);
     
-    const { google } = require('googleapis');
+    const { google } = await import('googleapis');
     const auth = new google.auth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/calendar'],
@@ -119,12 +118,12 @@ export async function POST(request: Request) {
     }
     
     return NextResponse.json(newCalendar.data);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in POST /api/calendars:', error);
     return NextResponse.json({ 
-      error: error.message || 'Failed to create calendar',
-      details: error.toString(),
-      stack: error.stack
+      error: (error as Error & {message?: string}).message || 'Failed to create calendar',
+      details: (error as Error).toString(),
+      stack: (error as Error & {stack?: string}).stack
     }, { status: 500 });
   }
 }

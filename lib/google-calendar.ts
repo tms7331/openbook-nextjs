@@ -20,28 +20,22 @@ export async function getCalendarClient(): Promise<calendar_v3.Calendar> {
     } else {
       console.log('Using Service Account authentication');
       
-      // Try to load from file directly
-      const fs = require('fs');
-      const path = require('path');
+      // Load from environment variable
+      const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
       
-      const keyFilePath = path.join(process.cwd(), 'service-account-key.json');
-      console.log('Looking for service account key at:', keyFilePath);
+      if (!serviceAccountKey) {
+        throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+      }
       
       let credentials;
       try {
-        if (fs.existsSync(keyFilePath)) {
-          console.log('Found service-account-key.json file');
-          const fileContent = fs.readFileSync(keyFilePath, 'utf8');
-          credentials = JSON.parse(fileContent);
-          console.log('Loaded credentials from file - type:', credentials.type);
-          console.log('Project ID:', credentials.project_id);
-          console.log('Client email:', credentials.client_email);
-        } else {
-          throw new Error(`Service account key file not found at ${keyFilePath}. Please add your service-account-key.json file to the project root.`);
-        }
-      } catch (error: any) {
-        console.error('Failed to load service account key:', error);
-        throw error;
+        credentials = JSON.parse(serviceAccountKey);
+        console.log('Loaded credentials from env - type:', credentials.type);
+        console.log('Project ID:', credentials.project_id);
+        console.log('Client email:', credentials.client_email);
+      } catch (error) {
+        console.error('Failed to parse service account key from env:', error as Error);
+        throw new Error('Invalid JSON in GOOGLE_SERVICE_ACCOUNT_KEY environment variable');
       }
       
       const auth = new google.auth.GoogleAuth({
@@ -52,7 +46,7 @@ export async function getCalendarClient(): Promise<calendar_v3.Calendar> {
       console.log('GoogleAuth created successfully');
       return google.calendar({ version: 'v3', auth });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in getCalendarClient:', error);
     throw error;
   }
