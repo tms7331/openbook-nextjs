@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import CalendarNavigation from '@/newcomponents/CalendarNavigation';
-import CalendarDisplay from '@/newcomponents/CalendarDisplay';
+import CalendarNavigation from '@/components/CalendarNavigation';
+import CalendarDisplay from '@/components/CalendarDisplay';
 import { CalendarData, CalendarView } from '@/types/calendar';
 
 interface Props {

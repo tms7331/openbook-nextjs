@@ -37,7 +37,7 @@ All API routes are in `app/api/`:
 
 ### Key Components
 
-- **Calendar Display**: `newcomponents/` contains calendar UI components using FullCalendar
+- **Calendar Display**: `components/` contains calendar UI components using FullCalendar
 - **Booking Pages**: 
   - `/book/[calendarId]` - Book a specific room
   - `/calendars` - List all available rooms
