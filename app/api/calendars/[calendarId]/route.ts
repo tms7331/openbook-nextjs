@@ -35,18 +35,22 @@ export async function DELETE(
 
     console.log('Using service account to delete calendar:', calendarId);
 
-    // First, check if we have write access to this calendar
+    // First, check if we have owner access to this calendar
     try {
-      const calendarInfo = await calendar.calendars.get({
-        calendarId: calendarId,
-      });
+      // Try to get calendar from calendarList to check access role
+      let accessRole = 'unknown';
+      try {
+        const calendarListEntry = await calendar.calendarList.get({
+          calendarId: calendarId,
+        });
+        console.log('Calendar list entry:', calendarListEntry.data);
+        accessRole = calendarListEntry.data.accessRole || 'unknown';
+      } catch (listError) {
+        // If we can't get it from calendar list, try to delete anyway
+        console.log('Could not get calendar from list, attempting delete anyway');
+      }
 
-      console.log('Calendar info:', calendarInfo.data);
-
-      // Check if this is a primary calendar or a calendar we own
-      const accessRole = calendarInfo.data.accessRole;
-
-      if (accessRole !== 'owner') {
+      if (accessRole !== 'owner' && accessRole !== 'unknown') {
         console.log(`Cannot delete calendar: Access role is ${accessRole}, not owner`);
         return NextResponse.json(
           {
@@ -69,14 +73,15 @@ export async function DELETE(
         success: true,
         message: `Calendar ${calendarId} deleted successfully`,
       });
-    } catch (deleteError: any) {
+    } catch (deleteError) {
       // Handle specific Google Calendar API errors
-      if (deleteError.code === 404) {
+      const error = deleteError as { code?: number; message?: string };
+      if (error.code === 404) {
         return NextResponse.json(
           { error: 'Calendar not found' },
           { status: 404 }
         );
-      } else if (deleteError.code === 403) {
+      } else if (error.code === 403) {
         return NextResponse.json(
           {
             error: 'Permission denied',
@@ -85,7 +90,7 @@ export async function DELETE(
           },
           { status: 403 }
         );
-      } else if (deleteError.code === 400) {
+      } else if (error.code === 400) {
         return NextResponse.json(
           {
             error: 'Cannot delete calendar',
