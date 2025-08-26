@@ -31,16 +31,7 @@ export default function BookingPage({ params }: Props) {
     try {
       const response = await fetch(`/api/bookings?calendarId=${id}`);
       const data = await response.json();
-
-      console.log('=== Calendar Events Loaded ===');
-      console.log('Calendar ID:', id);
-      console.log('Total events:', Array.isArray(data) ? data.length : 0);
-
       if (Array.isArray(data)) {
-
-        data.forEach((event, index) => {
-          console.log('event', event);
-        });
         setEvents(data);
       }
     } catch (error) {

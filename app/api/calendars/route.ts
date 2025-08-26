@@ -10,10 +10,6 @@ export async function GET() {
       throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
     }
 
-    // Debug: Check if the key looks correct
-    console.log('Service account key length:', serviceAccountKey.length);
-    console.log('First 100 chars:', serviceAccountKey.substring(0, 100));
-
     let credentials;
     try {
       credentials = JSON.parse(serviceAccountKey);

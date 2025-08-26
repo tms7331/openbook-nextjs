@@ -1,0 +1,107 @@
+import { NextResponse } from 'next/server';
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ calendarId: string }> }
+) {
+  try {
+    console.log('DELETE /api/calendars/[calendarId] - Starting');
+    const { calendarId } = await params;
+
+    if (!calendarId) {
+      return NextResponse.json(
+        { error: 'Calendar ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Use service account to delete calendar
+    const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountKey) {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+    }
+
+    const credentials = JSON.parse(serviceAccountKey);
+    const { google } = await import('googleapis');
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/calendar'],
+    });
+    const calendar = google.calendar({ version: 'v3', auth });
+
+    console.log('Using service account to delete calendar:', calendarId);
+
+    // First, check if we have write access to this calendar
+    try {
+      const calendarInfo = await calendar.calendars.get({
+        calendarId: calendarId,
+      });
+      
+      console.log('Calendar info:', calendarInfo.data);
+      
+      // Check if this is a primary calendar or a calendar we own
+      const accessRole = calendarInfo.data.accessRole;
+      
+      if (accessRole !== 'owner') {
+        console.log(`Cannot delete calendar: Access role is ${accessRole}, not owner`);
+        return NextResponse.json(
+          {
+            error: 'Insufficient permissions',
+            message: `Cannot delete this calendar. The service account has '${accessRole}' access, but 'owner' access is required to delete a calendar.`,
+            hint: 'Only calendars created by the service account can be deleted.'
+          },
+          { status: 403 }
+        );
+      }
+      
+      // Delete the calendar
+      await calendar.calendars.delete({
+        calendarId: calendarId,
+      });
+
+      console.log('Calendar deleted successfully:', calendarId);
+
+      return NextResponse.json({
+        success: true,
+        message: `Calendar ${calendarId} deleted successfully`,
+      });
+    } catch (deleteError: any) {
+      // Handle specific Google Calendar API errors
+      if (deleteError.code === 404) {
+        return NextResponse.json(
+          { error: 'Calendar not found' },
+          { status: 404 }
+        );
+      } else if (deleteError.code === 403) {
+        return NextResponse.json(
+          {
+            error: 'Permission denied',
+            message: 'The service account does not have permission to delete this calendar.',
+            hint: 'Only calendars created by the service account can be deleted.'
+          },
+          { status: 403 }
+        );
+      } else if (deleteError.code === 400) {
+        return NextResponse.json(
+          {
+            error: 'Cannot delete calendar',
+            message: 'This calendar cannot be deleted. It may be a primary calendar or a calendar shared with the service account.',
+            hint: 'Only secondary calendars created by the service account can be deleted.'
+          },
+          { status: 400 }
+        );
+      }
+      
+      throw deleteError;
+    }
+  } catch (error) {
+    console.error('Error in DELETE /api/calendars/[calendarId]:', error);
+    return NextResponse.json(
+      {
+        error: (error as Error & { message?: string }).message || 'Failed to delete calendar',
+        details: (error as Error).toString(),
+      },
+      { status: 500 }
+    );
+  }
+}
