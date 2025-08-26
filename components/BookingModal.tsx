@@ -43,7 +43,7 @@ export default function BookingModal({
           startTime: timeSlot.start.toISOString(),
           endTime: timeSlot.end.toISOString(),
           organizerName: userDetails.name,
-          organizerEmail: userDetails.email || 'user@example.com',
+          organizerEmail: userDetails.email || undefined,
           description: userDetails.notes || ''
         })
       })
@@ -173,7 +173,7 @@ export default function BookingModal({
                 marginBottom: '4px',
               }}
             >
-              Email (optional - for calendar invite)
+              Email (optional - for confirmation)
             </label>
             <input
               type='email'
