@@ -3,6 +3,7 @@ import { getCalendarClient, getAuthMethod } from '@/lib/google-calendar';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { Resend } from 'resend';
+import { generateICS } from '@/lib/ics-generator';
 
 export async function GET(request: Request) {
   try {
@@ -215,37 +216,111 @@ export async function POST(request: Request) {
           const startDate = new Date(body.startTime);
           const endDate = new Date(body.endTime);
           
+          // Generate ICS file content
+          const icsContent = generateICS({
+            title: body.title || 'Room Booking',
+            description: body.description || `Room: ${body.calendarId}`,
+            startTime: body.startTime,
+            endTime: body.endTime,
+            location: body.calendarId,
+            organizerEmail: body.organizerEmail,
+            organizerName: body.organizerName
+          });
+          
+          // Convert ICS content to base64 for attachment
+          const icsBase64 = Buffer.from(icsContent).toString('base64');
+          
+          // Format dates for display
+          const dateOptions: Intl.DateTimeFormatOptions = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          };
+          const timeOptions: Intl.DateTimeFormatOptions = { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+          };
+          
+          const formattedDate = startDate.toLocaleDateString('en-US', dateOptions);
+          const formattedStartTime = startDate.toLocaleTimeString('en-US', timeOptions);
+          const formattedEndTime = endDate.toLocaleTimeString('en-US', timeOptions);
+          
           await resend.emails.send({
             from: 'Room Booking <onboarding@resend.dev>',
             to: body.organizerEmail,
-            subject: `Room Booking Confirmed: ${body.title}`,
+            subject: `Invitation: ${body.title} @ ${formattedDate} ${formattedStartTime} (${body.calendarId})`,
             html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #2196F3;">Your room booking is confirmed!</h2>
-                
-                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <p style="margin: 10px 0;"><strong>Booking Title:</strong> ${body.title}</p>
-                  <p style="margin: 10px 0;"><strong>Room:</strong> ${body.calendarId}</p>
-                  <p style="margin: 10px 0;"><strong>Date:</strong> ${startDate.toLocaleDateString()}</p>
-                  <p style="margin: 10px 0;"><strong>Time:</strong> ${startDate.toLocaleTimeString()} - ${endDate.toLocaleTimeString()}</p>
-                  ${body.description ? `<p style="margin: 10px 0;"><strong>Notes:</strong> ${body.description}</p>` : ''}
+              <div style="font-family: 'Google Sans', Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <!-- Google Calendar style header -->
+                <div style="border-left: 4px solid #4285F4; padding-left: 16px; margin-bottom: 20px;">
+                  <h2 style="color: #1a1a1a; font-size: 24px; font-weight: 400; margin: 0 0 8px 0;">
+                    ${body.title}
+                  </h2>
+                  <div style="color: #5f6368; font-size: 14px;">
+                    <div style="margin-bottom: 4px;">
+                      <strong style="display: inline-block; width: 60px;">When</strong>
+                      ${formattedDate} ⋅ ${formattedStartTime} – ${formattedEndTime}
+                    </div>
+                    <div style="margin-bottom: 4px;">
+                      <strong style="display: inline-block; width: 60px;">Where</strong>
+                      ${body.calendarId}
+                    </div>
+                    ${body.description ? `
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+                      <strong style="display: block; margin-bottom: 4px;">Description</strong>
+                      ${body.description}
+                    </div>` : ''}
+                  </div>
                 </div>
                 
-                <p style="color: #666; font-size: 14px;">
-                  This booking has been added to the room's calendar. 
-                  To receive calendar invites directly, consider signing in with Google when booking.
-                </p>
+                <!-- Action buttons -->
+                <div style="margin: 24px 0;">
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding-right: 8px;">
+                        <div style="display: inline-block; background-color: #1a73e8; color: white; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                          Yes
+                        </div>
+                      </td>
+                      <td style="padding-right: 8px;">
+                        <div style="display: inline-block; background-color: #ffffff; color: #5f6368; padding: 10px 24px; border-radius: 4px; border: 1px solid #dadce0; text-decoration: none; font-size: 14px; font-weight: 500;">
+                          Maybe
+                        </div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; background-color: #ffffff; color: #5f6368; padding: 10px 24px; border-radius: 4px; border: 1px solid #dadce0; text-decoration: none; font-size: 14px; font-weight: 500;">
+                          No
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
                 
-                <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+                <div style="border-top: 1px solid #e0e0e0; margin-top: 24px; padding-top: 16px;">
+                  <p style="color: #5f6368; font-size: 12px; line-height: 16px;">
+                    <strong>Going?</strong> The buttons above are display-only. 
+                    To add this event to your calendar, please open the attached invite.ics file.
+                  </p>
+                </div>
                 
-                <p style="color: #999; font-size: 12px; text-align: center;">
-                  This is an automated confirmation email for your room booking.
-                </p>
+                <div style="margin-top: 16px; padding: 12px; background-color: #f8f9fa; border-radius: 8px;">
+                  <p style="color: #5f6368; font-size: 12px; margin: 0;">
+                    📎 <strong>invite.ics</strong> attached – Open this file to add the event to your calendar
+                  </p>
+                </div>
               </div>
-            `
+            `,
+            attachments: [
+              {
+                filename: 'invite.ics',
+                content: icsBase64
+              }
+            ]
           });
           
-          console.log('Confirmation email sent to:', body.organizerEmail);
+          console.log('Confirmation email with ICS sent to:', body.organizerEmail);
         } catch (emailError) {
           console.error('Failed to send email notification:', emailError);
           // Don't fail the booking if email fails - it's just a nice-to-have
