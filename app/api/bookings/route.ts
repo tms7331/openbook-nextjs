@@ -169,7 +169,7 @@ export async function POST(request: Request) {
       console.log('Service account mode - single booking');
       const calendar = await getCalendarClient();
       
-      const event: any = {
+      const event = {
         summary: body.title || 'Untitled Event',
         description: body.description || '',
         start: { dateTime: body.startTime },

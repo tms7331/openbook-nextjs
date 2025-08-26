@@ -1,18 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import { CalendarView } from '../types/calendar'
 
 interface CalendarNavigationProps {
   currentDate: Date
   onDateChange: (date: Date) => void
-  view: CalendarView
-  onViewChange: (view: CalendarView) => void
 }
 
 export default function CalendarNavigation({
   currentDate,
   onDateChange,
-  view,
-  onViewChange,
 }: CalendarNavigationProps) {
   function navigateDate(days: number) {
     const newDate = new Date(currentDate)

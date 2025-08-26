@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import CalendarNavigation from '@/components/CalendarNavigation';
 import CalendarDisplay from '@/components/CalendarDisplay';
-import { CalendarData, CalendarView } from '@/types/calendar';
+import { CalendarData } from '@/types/calendar';
 
 interface Props {
   params: Promise<{ calendarId: string }>;
@@ -12,7 +12,6 @@ interface Props {
 export default function BookingPage({ params }: Props) {
   const [calendarId, setCalendarId] = useState<string>('');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<CalendarView>('week');
   const [events, setEvents] = useState<Array<{
     id: string;
     summary?: string;
@@ -111,14 +110,11 @@ export default function BookingPage({ params }: Props) {
         <CalendarNavigation
           currentDate={currentDate}
           onDateChange={setCurrentDate}
-          view={view}
-          onViewChange={setView}
         />
         <div style={{ padding: '8px' }}>
           <CalendarDisplay
             calendarData={calendarData}
             currentDate={currentDate}
-            view={view}
           />
         </div>
       </div>

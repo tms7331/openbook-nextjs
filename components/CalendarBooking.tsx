@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import CalendarNavigation from './CalendarNavigation'
 import CalendarDisplay from './CalendarDisplay'
-import { CalendarData, CalendarView } from '../types/calendar'
+import { CalendarData } from '../types/calendar'
 
 interface CalendarBookingProps {
   calendarId: string
@@ -10,7 +10,6 @@ interface CalendarBookingProps {
 
 export default function CalendarBooking({ calendarId }: CalendarBookingProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [view, setView] = useState<CalendarView>('day')
 
   const mockCalendarData: CalendarData = {
     id: calendarId,
@@ -42,14 +41,11 @@ export default function CalendarBooking({ calendarId }: CalendarBookingProps) {
         <CalendarNavigation
           currentDate={currentDate}
           onDateChange={setCurrentDate}
-          view={view}
-          onViewChange={setView}
         />
         <div css={{ padding: '8px' }}>
           <CalendarDisplay
             calendarData={mockCalendarData}
             currentDate={currentDate}
-            view={view}
           />
         </div>
       </div>
