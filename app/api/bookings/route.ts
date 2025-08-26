@@ -216,13 +216,27 @@ export async function POST(request: Request) {
           const startDate = new Date(body.startTime);
           const endDate = new Date(body.endTime);
           
+          // Try to get calendar name
+          let roomName = body.calendarId; // Default to ID if we can't get the name
+          try {
+            // Get calendar details to fetch the name
+            const calendarDetails = await calendar.calendars.get({
+              calendarId: body.calendarId
+            });
+            roomName = calendarDetails.data.summary || body.calendarId;
+            console.log('Room name fetched:', roomName);
+          } catch (err) {
+            console.error('Failed to fetch calendar name:', err);
+            // Continue with calendar ID as fallback
+          }
+          
           // Generate ICS file content
           const icsContent = generateICS({
             title: body.title || 'Room Booking',
-            description: body.description || `Room: ${body.calendarId}`,
+            description: body.description || `Room: ${roomName}`,
             startTime: body.startTime,
             endTime: body.endTime,
-            location: body.calendarId,
+            location: roomName,
             organizerEmail: body.organizerEmail,
             organizerName: body.organizerName
           });
@@ -250,7 +264,7 @@ export async function POST(request: Request) {
           await resend.emails.send({
             from: 'Room Booking <onboarding@resend.dev>',
             to: body.organizerEmail,
-            subject: `Invitation: ${body.title} @ ${formattedDate} ${formattedStartTime} (${body.calendarId})`,
+            subject: `Invitation: ${body.title} @ ${formattedDate} ${formattedStartTime} (${roomName})`,
             html: `
               <div style="font-family: 'Google Sans', Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <!-- Google Calendar style header -->
@@ -265,7 +279,7 @@ export async function POST(request: Request) {
                     </div>
                     <div style="margin-bottom: 4px;">
                       <strong style="display: inline-block; width: 60px;">Where</strong>
-                      ${body.calendarId}
+                      ${roomName}
                     </div>
                     ${body.description ? `
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
@@ -280,19 +294,23 @@ export async function POST(request: Request) {
                   <table cellpadding="0" cellspacing="0">
                     <tr>
                       <td style="padding-right: 8px;">
-                        <div style="display: inline-block; background-color: #1a73e8; color: white; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: 500;">
-                          Yes
-                        </div>
+                        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(body.title || 'Room Booking')}&dates=${startDate.toISOString().replace(/[-:]/g, '').replace(/\\.\\d{3}/, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\\.\\d{3}/, '')}&details=${encodeURIComponent(body.description || '')}&location=${encodeURIComponent(roomName)}" 
+                           style="display: inline-block; background-color: #1a73e8; color: white; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                          Add to Calendar
+                        </a>
                       </td>
                       <td style="padding-right: 8px;">
-                        <div style="display: inline-block; background-color: #ffffff; color: #5f6368; padding: 10px 24px; border-radius: 4px; border: 1px solid #dadce0; text-decoration: none; font-size: 14px; font-weight: 500;">
-                          Maybe
-                        </div>
+                        <a href="https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(body.title || 'Room Booking')}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${encodeURIComponent(roomName)}&body=${encodeURIComponent(body.description || '')}" 
+                           style="display: inline-block; background-color: #ffffff; color: #5f6368; padding: 10px 24px; border-radius: 4px; border: 1px solid #dadce0; text-decoration: none; font-size: 14px; font-weight: 500;">
+                          Add to Outlook
+                        </a>
                       </td>
                       <td>
-                        <div style="display: inline-block; background-color: #ffffff; color: #5f6368; padding: 10px 24px; border-radius: 4px; border: 1px solid #dadce0; text-decoration: none; font-size: 14px; font-weight: 500;">
-                          No
-                        </div>
+                        <a href="data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}" 
+                           download="invite.ics"
+                           style="display: inline-block; background-color: #ffffff; color: #5f6368; padding: 10px 24px; border-radius: 4px; border: 1px solid #dadce0; text-decoration: none; font-size: 14px; font-weight: 500;">
+                          Download .ics
+                        </a>
                       </td>
                     </tr>
                   </table>
@@ -300,8 +318,7 @@ export async function POST(request: Request) {
                 
                 <div style="border-top: 1px solid #e0e0e0; margin-top: 24px; padding-top: 16px;">
                   <p style="color: #5f6368; font-size: 12px; line-height: 16px;">
-                    <strong>Going?</strong> The buttons above are display-only. 
-                    To add this event to your calendar, please open the attached invite.ics file.
+                    Click "Add to Calendar" above or open the attached invite.ics file to add this event to your calendar.
                   </p>
                 </div>
                 
