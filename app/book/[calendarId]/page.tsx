@@ -1,45 +1,84 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import CalendarNavigation from '@/components/CalendarNavigation';
 import CalendarDisplay from '@/components/CalendarDisplay';
+import CalendarNavigation from '@/components/CalendarNavigation';
 import { CalendarData } from '@/types/calendar';
+import { useEffect, useState } from 'react';
 
 interface Props {
   params: Promise<{ calendarId: string }>;
 }
 
+function CalendarName({ calendarId }: { calendarId: string }) {
+  const [calendarName, setCalendarName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCalendarMetadata() {
+      try {
+        const response = await fetch(`/api/calendars/${calendarId}`);
+        const data = await response.json();
+        console.log('Calendar metadata:', data);
+        setCalendarName(data.calendar?.summary || `Calendar ${calendarId}`);
+      } catch (error) {
+        console.error('Failed to fetch calendar metadata:', error);
+        setCalendarName(`Calendar ${calendarId}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCalendarMetadata();
+  }, [calendarId]);
+
+  if (loading) {
+    return (
+      <h1 style={{ 
+        fontSize: '2.5rem', 
+        textAlign: 'center', 
+        marginBottom: '2rem', 
+        color: '#333',
+        fontWeight: 'bold'
+      }}>
+        Loading calendar name...
+      </h1>
+    );
+  }
+
+  return (
+    <h1 style={{ 
+      fontSize: '2.5rem', 
+      textAlign: 'center', 
+      marginBottom: '2rem', 
+      color: '#333',
+      fontWeight: 'bold'
+    }}>
+      {calendarName}
+    </h1>
+  );
+}
+
 export default function BookingPage({ params }: Props) {
   const [calendarId, setCalendarId] = useState<string>('');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useState<Array<{
-    id: string;
-    summary?: string;
-    start?: {dateTime?: string; date?: string};
-    end?: {dateTime?: string; date?: string};
-  }>>([]);
+  const [events, setEvents] = useState<
+    Array<{
+      id: string;
+      summary?: string;
+      start?: { dateTime?: string; date?: string };
+      end?: { dateTime?: string; date?: string };
+    }>
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [authStatus, setAuthStatus] = useState<{authenticated: boolean; user?: {email: string}} | null>(null);
 
   useEffect(() => {
-    params.then(p => {
-      setCalendarId(p.calendarId);
+    params.then((p) => {
       fetchEvents(p.calendarId);
+      setCalendarId(p.calendarId);
     });
-    checkAuthStatus();
   }, [params]);
 
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch('/api/auth-status');
-      const data = await response.json();
-      setAuthStatus(data);
-    } catch (error) {
-      console.error('Failed to check auth status:', error);
-    }
-  };
-
-  const fetchEvents = async (id: string) => {
+  async function fetchEvents(id: string) {
     try {
       const response = await fetch(`/api/bookings?calendarId=${id}`);
       const data = await response.json();
@@ -51,72 +90,52 @@ export default function BookingPage({ params }: Props) {
     } finally {
       setLoading(false);
     }
-  };
-
+  }
 
   const calendarData: CalendarData = {
     id: calendarId,
-    name: `Calendar ${calendarId}`,
+    name: calendarId,
     type: 'room',
-    events: events.map(event => ({
+    events: events.map((event) => ({
       id: event.id,
       title: event.summary || 'Busy',
       start: new Date(event.start?.dateTime || event.start?.date || new Date()),
       end: new Date(event.end?.dateTime || event.end?.date || new Date()),
-      type: 'booking' as const
+      type: 'booking' as const,
     })),
-    timeSlots: []
+    timeSlots: [],
   };
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading calendar...</div>;
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        Loading calendar...
+      </div>
+    );
   }
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1>Book a Time Slot</h1>
-        {authStatus && (
-          <div style={{
-            padding: '0.75rem 1.25rem',
-            backgroundColor: authStatus.authenticated ? '#4CAF50' : '#2196F3',
-            color: 'white',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}>
-            {authStatus.authenticated ? (
-              <>✓ Signed in as {authStatus.user?.email}</>
-            ) : (
-              <>🔒 Not signed in (using service account)</>
-            )}
-          </div>
-        )}
-      </div>
-      <p style={{ marginBottom: '2rem', color: '#666' }}>
-        Calendar ID: {calendarId}
-      </p>
-      
-      <div style={{
-        backgroundColor: '#fafafa',
-        borderRadius: '12px',
-        padding: 0,
-        minHeight: '80vh',
-        border: '1px solid #90caf9',
-        boxShadow: '0 4px 6px -1px rgba(33, 150, 243, 0.12)',
-        overflow: 'hidden',
-      }}>
+      <CalendarName calendarId={calendarId} />
+
+      <div
+        style={{
+          backgroundColor: '#fafafa',
+          borderRadius: '12px',
+          padding: 0,
+          minHeight: '80vh',
+          boxShadow: '0 4px 6px -1px rgba(33, 150, 243, 0.12)',
+          overflow: 'hidden',
+        }}
+      >
         <CalendarNavigation
           currentDate={currentDate}
           onDateChange={setCurrentDate}
         />
-        <div style={{ padding: '8px' }}>
-          <CalendarDisplay
-            calendarData={calendarData}
-            currentDate={currentDate}
-          />
-        </div>
+        <CalendarDisplay
+          calendarData={calendarData}
+          currentDate={currentDate}
+        />
       </div>
     </div>
   );
