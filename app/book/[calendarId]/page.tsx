@@ -15,35 +15,32 @@ export default function BookingPage({ params }: Props) {
   const [events, setEvents] = useState<Array<{
     id: string;
     summary?: string;
-    start?: {dateTime?: string; date?: string};
-    end?: {dateTime?: string; date?: string};
+    start?: { dateTime?: string; date?: string };
+    end?: { dateTime?: string; date?: string };
   }>>([]);
   const [loading, setLoading] = useState(true);
-  const [authStatus, setAuthStatus] = useState<{authenticated: boolean; user?: {email: string}} | null>(null);
 
   useEffect(() => {
     params.then(p => {
       setCalendarId(p.calendarId);
       fetchEvents(p.calendarId);
     });
-    checkAuthStatus();
   }, [params]);
-
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch('/api/auth-status');
-      const data = await response.json();
-      setAuthStatus(data);
-    } catch (error) {
-      console.error('Failed to check auth status:', error);
-    }
-  };
 
   const fetchEvents = async (id: string) => {
     try {
       const response = await fetch(`/api/bookings?calendarId=${id}`);
       const data = await response.json();
+
+      console.log('=== Calendar Events Loaded ===');
+      console.log('Calendar ID:', id);
+      console.log('Total events:', Array.isArray(data) ? data.length : 0);
+
       if (Array.isArray(data)) {
+
+        data.forEach((event, index) => {
+          console.log('event', event);
+        });
         setEvents(data);
       }
     } catch (error) {
@@ -76,28 +73,11 @@ export default function BookingPage({ params }: Props) {
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1>Book a Time Slot</h1>
-        {authStatus && (
-          <div style={{
-            padding: '0.75rem 1.25rem',
-            backgroundColor: authStatus.authenticated ? '#4CAF50' : '#2196F3',
-            color: 'white',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}>
-            {authStatus.authenticated ? (
-              <>✓ Signed in as {authStatus.user?.email}</>
-            ) : (
-              <>🔒 Not signed in (using service account)</>
-            )}
-          </div>
-        )}
       </div>
       <p style={{ marginBottom: '2rem', color: '#666' }}>
         Calendar ID: {calendarId}
       </p>
-      
+
       <div style={{
         backgroundColor: '#fafafa',
         borderRadius: '12px',

@@ -1,25 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function HomePage() {
-  const [authStatus, setAuthStatus] = useState<{authenticated: boolean; user?: {email: string}} | null>(null);
-
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch('/api/auth-status');
-      const data = await response.json();
-      setAuthStatus(data);
-    } catch (error) {
-      console.error('Failed to check auth status:', error);
-    }
-  };
-
   return (
     <div style={{ 
       minHeight: '100vh',
@@ -76,51 +59,22 @@ export default function HomePage() {
             </button>
           </Link>
 
-          {authStatus && !authStatus.authenticated ? (
-            <button 
-              onClick={() => window.location.href = '/api/auth/signin'}
-              style={{
-                width: '100%',
-                padding: '1rem 2rem',
-                fontSize: '1.1rem',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '500',
-                transition: 'background-color 0.2s'
-              }}
-            >
-              🔑 Sign in with Google
-            </button>
-          ) : authStatus?.authenticated ? (
-            <div style={{
-              padding: '1rem',
-              backgroundColor: '#e8f5e9',
+          <Link href="/create-calendar">
+            <button style={{
+              width: '100%',
+              padding: '1rem 2rem',
+              fontSize: '1.1rem',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
               borderRadius: '8px',
-              color: '#2e7d32'
+              cursor: 'pointer',
+              fontWeight: '500',
+              transition: 'background-color 0.2s'
             }}>
-              ✓ Signed in as {authStatus.user?.email}
-              <button 
-                onClick={() => window.location.href = '/api/auth/signout'}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  marginTop: '0.5rem',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.9rem',
-                  backgroundColor: 'transparent',
-                  color: '#2e7d32',
-                  border: '1px solid #2e7d32',
-                  borderRadius: '6px',
-                  cursor: 'pointer'
-                }}
-              >
-                Sign Out
-              </button>
-            </div>
-          ) : null}
+              ➕ Create New Calendar
+            </button>
+          </Link>
         </div>
 
         <div style={{
@@ -132,9 +86,7 @@ export default function HomePage() {
             fontSize: '0.9rem',
             color: '#999'
           }}>
-            {authStatus?.authenticated 
-              ? 'Your bookings will appear in your Google Calendar'
-              : 'Sign in to sync bookings with your calendar'}
+            All bookings are managed via Google Calendar
           </p>
         </div>
       </div>

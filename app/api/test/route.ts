@@ -5,9 +5,6 @@ export async function GET() {
   
   const endpoints = {
     auth: {
-      signIn: `${baseUrl}/api/auth/signin`,
-      signOut: `${baseUrl}/api/auth/signout`,
-      session: `${baseUrl}/api/auth/session`,
       status: `${baseUrl}/api/auth-status`
     },
     calendars: {

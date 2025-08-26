@@ -46,15 +46,9 @@ export default function TestPage() {
       <h1 style={{ color: '#333' }}>Calendar API Test</h1>
       
       <div style={{ backgroundColor: 'white', padding: '20px', marginBottom: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ color: '#333' }}>Authentication</h2>
-        <button style={buttonStyle} onClick={() => window.location.href = '/api/auth/signin'}>
-          Sign In with Google
-        </button>
-        <button style={dangerButtonStyle} onClick={() => window.location.href = '/api/auth/signout'}>
-          Sign Out
-        </button>
+        <h2 style={{ color: '#333' }}>System Status</h2>
         <button style={infoButtonStyle} onClick={() => apiCall('/api/auth-status')}>
-          Check Auth Status
+          Check System Status
         </button>
       </div>
 
@@ -186,12 +180,12 @@ export default function TestPage() {
       <div style={{ backgroundColor: '#fff3cd', padding: '20px', marginTop: '30px', borderRadius: '8px', border: '1px solid #ffc107' }}>
         <h3 style={{ color: '#856404', marginTop: 0 }}>📋 Instructions:</h3>
         <ol style={{ color: '#856404', lineHeight: '1.8' }}>
-          <li>First, check auth status to see if you&apos;re logged in</li>
+          <li>Check system status to verify service account configuration</li>
           <li>Create a calendar (only works with service account)</li>
           <li>Copy the calendar ID from the result</li>
           <li>Paste it in the input field above</li>
           <li>Try creating bookings and checking availability</li>
-          <li>Sign in with Google to test OAuth bookings</li>
+          <li>All bookings are created using the service account</li>
         </ol>
       </div>
     </div>
