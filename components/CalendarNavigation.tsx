@@ -10,18 +10,17 @@ export default function CalendarNavigation({
   onDateChange,
 }: CalendarNavigationProps) {
   function navigateDate(days: number) {
-    const newDate = new Date(currentDate)
-    newDate.setDate(currentDate.getDate() + days)
-    onDateChange(newDate)
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + days);
+    onDateChange(newDate);
   }
 
   function formatDate(date: Date) {
     return date.toLocaleDateString('en-US', {
-      weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
+    });
   }
 
   return (
@@ -32,7 +31,7 @@ export default function CalendarNavigation({
         justifyContent: 'space-between',
         padding: '8px',
         borderBottom: '1px solid #90caf9',
-        marginBottom: '8px',
+        marginBottom: '-18px',
         backgroundColor: '#fafafa',
       }}
     >
@@ -70,7 +69,12 @@ export default function CalendarNavigation({
             },
           }}
         >
-          <svg width='16' height='16' viewBox='0 0 24 24' fill='currentColor'>
+          <svg
+            width='16'
+            height='16'
+            viewBox='0 0 24 24'
+            fill='currentColor'
+          >
             <path d='M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z' />
           </svg>
         </button>
@@ -113,7 +117,12 @@ export default function CalendarNavigation({
             },
           }}
         >
-          <svg width='16' height='16' viewBox='0 0 24 24' fill='currentColor'>
+          <svg
+            width='16'
+            height='16'
+            viewBox='0 0 24 24'
+            fill='currentColor'
+          >
             <path d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z' />
           </svg>
         </button>
@@ -126,7 +135,6 @@ export default function CalendarNavigation({
           gap: '12px',
         }}
       >
-
         <button
           onClick={() => onDateChange(new Date())}
           css={{
@@ -162,5 +170,5 @@ export default function CalendarNavigation({
         </button>
       </div>
     </div>
-  )
+  );
 }
