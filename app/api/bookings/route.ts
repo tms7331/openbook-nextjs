@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCalendarClient, getAuthMethod } from '@/lib/google-calendar';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { Resend } from 'resend';
 
 export async function GET(request: Request) {
   try {
@@ -167,7 +168,7 @@ export async function POST(request: Request) {
       console.log('Service account mode - single booking');
       const calendar = await getCalendarClient();
       
-      const event = {
+      const event: any = {
         summary: body.title || 'Untitled Event',
         description: body.description || '',
         start: { dateTime: body.startTime },
@@ -187,13 +188,70 @@ export async function POST(request: Request) {
       }
       event.description = descriptionParts.join('\n');
       
+      // Note: Service accounts cannot send calendar invites without Domain-Wide Delegation
+      // If you need email notifications, consider:
+      // 1. Setting up Domain-Wide Delegation (requires Google Workspace admin)
+      // 2. Using a separate email service (SendGrid, AWS SES, etc.)
+      // 3. Having users sign in with OAuth to get proper calendar invites
+      
+      // For now, we'll create the event without attendees to avoid the error
+      // The email is still captured in the description for reference
+      
       console.log('Creating single event on room calendar');
+      console.log('Event object:', JSON.stringify(event, null, 2));
+      
       const result = await calendar.events.insert({
         calendarId: body.calendarId,
         requestBody: event
       });
       
       console.log('Event created successfully:', result.data.id);
+      
+      // Send email notification if email provided and Resend is configured
+      if (body.organizerEmail && process.env.RESEND_API_KEY) {
+        try {
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          
+          const startDate = new Date(body.startTime);
+          const endDate = new Date(body.endTime);
+          
+          await resend.emails.send({
+            from: 'Room Booking <onboarding@resend.dev>',
+            to: body.organizerEmail,
+            subject: `Room Booking Confirmed: ${body.title}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2196F3;">Your room booking is confirmed!</h2>
+                
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <p style="margin: 10px 0;"><strong>Booking Title:</strong> ${body.title}</p>
+                  <p style="margin: 10px 0;"><strong>Room:</strong> ${body.calendarId}</p>
+                  <p style="margin: 10px 0;"><strong>Date:</strong> ${startDate.toLocaleDateString()}</p>
+                  <p style="margin: 10px 0;"><strong>Time:</strong> ${startDate.toLocaleTimeString()} - ${endDate.toLocaleTimeString()}</p>
+                  ${body.description ? `<p style="margin: 10px 0;"><strong>Notes:</strong> ${body.description}</p>` : ''}
+                </div>
+                
+                <p style="color: #666; font-size: 14px;">
+                  This booking has been added to the room's calendar. 
+                  To receive calendar invites directly, consider signing in with Google when booking.
+                </p>
+                
+                <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+                
+                <p style="color: #999; font-size: 12px; text-align: center;">
+                  This is an automated confirmation email for your room booking.
+                </p>
+              </div>
+            `
+          });
+          
+          console.log('Confirmation email sent to:', body.organizerEmail);
+        } catch (emailError) {
+          console.error('Failed to send email notification:', emailError);
+          // Don't fail the booking if email fails - it's just a nice-to-have
+        }
+      }
+      
       return NextResponse.json(result.data);
     }
   } catch (error) {
