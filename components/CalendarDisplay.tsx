@@ -10,11 +10,15 @@ import EventDetailsModal from './EventDetailsModal';
 interface CalendarDisplayProps {
   calendarData: CalendarData;
   currentDate: Date;
+  isAdmin?: boolean;
+  onEventDelete?: (eventId: string) => Promise<void>;
 }
 
 export default function CalendarDisplay({
   calendarData,
   currentDate,
+  isAdmin = false,
+  onEventDelete,
 }: CalendarDisplayProps) {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
     null
@@ -177,6 +181,13 @@ export default function CalendarDisplay({
         <EventDetailsModal
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
+          isAdmin={isAdmin}
+          onDelete={async () => {
+            if (onEventDelete) {
+              await onEventDelete(selectedEvent.id);
+              setSelectedEvent(null);
+            }
+          }}
         />
       )}
     </div>

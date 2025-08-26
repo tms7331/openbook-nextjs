@@ -3,7 +3,8 @@
 import CalendarDisplay from '@/components/CalendarDisplay';
 import CalendarNavigation from '@/components/CalendarNavigation';
 import { CalendarData } from '@/types/calendar';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface Props {
   params: Promise<{ calendarId: string }>;
@@ -58,7 +59,7 @@ function CalendarName({ calendarId }: { calendarId: string }) {
   );
 }
 
-export default function BookingPage({ params }: Props) {
+function BookingPageContent({ params }: Props) {
   const [calendarId, setCalendarId] = useState<string>('');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<
@@ -70,6 +71,8 @@ export default function BookingPage({ params }: Props) {
     }>
   >([]);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const isAdmin = searchParams.get('admin') === 'true';
 
   useEffect(() => {
     params.then((p) => {
@@ -135,8 +138,34 @@ export default function BookingPage({ params }: Props) {
         <CalendarDisplay
           calendarData={calendarData}
           currentDate={currentDate}
+          isAdmin={isAdmin}
+          onEventDelete={async (eventId: string) => {
+            try {
+              const response = await fetch(`/api/bookings/${eventId}?calendarId=${calendarId}`, {
+                method: 'DELETE',
+              });
+              if (response.ok) {
+                // Refresh events after deletion
+                await fetchEvents(calendarId);
+              } else {
+                const error = await response.json();
+                alert(`Failed to delete event: ${error.message || error.error}`);
+              }
+            } catch (error) {
+              console.error('Failed to delete event:', error);
+              alert('Failed to delete event');
+            }
+          }}
         />
       </div>
     </div>
+  );
+}
+
+export default function BookingPage({ params }: Props) {
+  return (
+    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
+      <BookingPageContent params={params} />
+    </Suspense>
   );
 }

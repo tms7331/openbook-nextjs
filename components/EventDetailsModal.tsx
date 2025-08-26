@@ -5,12 +5,17 @@ import React from 'react'
 interface EventDetailsModalProps {
   event: CalendarEvent
   onClose: () => void
+  isAdmin?: boolean
+  onDelete?: () => Promise<void>
 }
 
 export default function EventDetailsModal({
   event,
   onClose,
+  isAdmin = false,
+  onDelete,
 }: EventDetailsModalProps) {
+  const [isDeleting, setIsDeleting] = React.useState(false)
   function formatTime(date: Date) {
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
@@ -189,9 +194,46 @@ export default function EventDetailsModal({
         <div
           css={{
             display: 'flex',
-            justifyContent: 'flex-end',
+            justifyContent: isAdmin && onDelete ? 'space-between' : 'flex-end',
+            gap: '12px',
           }}
         >
+          {isAdmin && onDelete && (
+            <button
+              type='button'
+              onClick={async () => {
+                if (confirm('Are you sure you want to delete this event?')) {
+                  setIsDeleting(true)
+                  try {
+                    await onDelete()
+                  } catch (error) {
+                    console.error('Failed to delete event:', error)
+                  } finally {
+                    setIsDeleting(false)
+                  }
+                }
+              }}
+              disabled={isDeleting}
+              css={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                cursor: isDeleting ? 'not-allowed' : 'pointer',
+                padding: '12px 24px',
+                fontSize: '14px',
+                fontWeight: '500',
+                backgroundColor: isDeleting ? '#999' : '#f44336',
+                color: '#fafafa',
+                border: 'none',
+                borderRadius: '8px',
+                opacity: isDeleting ? 0.7 : 1,
+                '&:hover': {
+                  backgroundColor: isDeleting ? '#999' : '#e53935',
+                },
+              }}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Event'}
+            </button>
+          )}
           <button
             type='button'
             onClick={onClose}
