@@ -3,30 +3,30 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { CalendarData, CalendarView, TimeSlot } from '../types/calendar'
-import { useState } from 'react'
+import { CalendarData, TimeSlot } from '../types/calendar'
+import { useState, useRef, useEffect } from 'react'
 import BookingModal from './BookingModal'
 
 interface CalendarDisplayProps {
   calendarData: CalendarData
   currentDate: Date
-  view: CalendarView
-}
-
-function getCalendarView(view: CalendarView): string {
-  if (view === 'day') return 'timeGridDay'
-  if (view === 'week') return 'timeGridWeek'
-  return 'dayGridMonth'
 }
 
 export default function CalendarDisplay({
   calendarData,
   currentDate,
-  view,
 }: CalendarDisplayProps) {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
     null,
   )
+  const calendarRef = useRef<FullCalendar>(null)
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi()
+      calendarApi.gotoDate(currentDate)
+    }
+  }, [currentDate])
 
   const events = calendarData.events.map((event) => {
     const isBooking = event.type === 'booking'
@@ -105,8 +105,9 @@ export default function CalendarDisplay({
       }}
     >
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView={getCalendarView(view)}
+        ref={calendarRef}
+        plugins={[timeGridPlugin, interactionPlugin]}
+        initialView='timeGridDay'
         initialDate={currentDate}
         events={events}
         dateClick={handleDateClick}

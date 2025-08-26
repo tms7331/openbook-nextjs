@@ -11,6 +11,8 @@ interface CalendarNavigationProps {
 export default function CalendarNavigation({
   currentDate,
   onDateChange,
+  view,
+  onViewChange,
 }: CalendarNavigationProps) {
   function navigateDate(days: number) {
     const newDate = new Date(currentDate)
@@ -122,39 +124,48 @@ export default function CalendarNavigation({
         </button>
       </div>
 
-      <button
-        onClick={() => onDateChange(new Date())}
+      <div
         css={{
-          display: 'inline-flex',
+          display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          padding: '8px 16px',
-          fontSize: '14px',
-          fontWeight: '500',
-          backgroundColor: '#2196f3',
-          color: 'white',
-          border: 'none',
-          outline: 'none',
-          borderRadius: '12px',
-          boxShadow: '0 4px 14px -6px #2196f3',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          transform: 'translateY(0)',
-          '&:hover': {
-            backgroundColor: '#1e88e5',
-            transform: 'translateY(-1px)',
-            boxShadow: '0 6px 20px -6px #2196f3',
-          },
-          '&:active': {
-            transform: 'translateY(0)',
-            boxShadow: '0 4px 14px -6px #2196f3',
-          },
+          gap: '12px',
         }}
       >
-        {currentDate.toDateString() === new Date().toDateString()
-          ? 'Today'
-          : 'Go to Today'}
-      </button>
+
+        <button
+          onClick={() => onDateChange(new Date())}
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            padding: '8px 16px',
+            fontSize: '14px',
+            fontWeight: '500',
+            backgroundColor: '#2196f3',
+            color: 'white',
+            border: 'none',
+            outline: 'none',
+            borderRadius: '12px',
+            boxShadow: '0 4px 14px -6px #2196f3',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: 'translateY(0)',
+            '&:hover': {
+              backgroundColor: '#1e88e5',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px -6px #2196f3',
+            },
+            '&:active': {
+              transform: 'translateY(0)',
+              boxShadow: '0 4px 14px -6px #2196f3',
+            },
+          }}
+        >
+          {currentDate.toDateString() === new Date().toDateString()
+            ? 'Today'
+            : 'Go to Today'}
+        </button>
+      </div>
     </div>
   )
 }

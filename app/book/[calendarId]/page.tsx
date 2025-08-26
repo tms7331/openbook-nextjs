@@ -115,7 +115,7 @@ export default function BookingPage({ params }: Props) {
           onViewChange={setView}
         />
         <div style={{ padding: '8px' }}>
-          <CalendarDisplayWrapper
+          <CalendarDisplay
             calendarData={calendarData}
             currentDate={currentDate}
             view={view}
@@ -123,24 +123,5 @@ export default function BookingPage({ params }: Props) {
         </div>
       </div>
     </div>
-  );
-}
-
-// Wrapper component to handle booking
-function CalendarDisplayWrapper({ 
-  calendarData, 
-  currentDate, 
-  view
-}: { 
-  calendarData: CalendarData;
-  currentDate: Date;
-  view: CalendarView;
-}) {
-  return (
-    <CalendarDisplay
-      calendarData={calendarData}
-      currentDate={currentDate}
-      view={view}
-    />
   );
 }
