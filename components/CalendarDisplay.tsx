@@ -40,8 +40,21 @@ export default function CalendarDisplay({
     }
   })
 
+  const hasEventConflict = (start: Date, end: Date): boolean => {
+    return calendarData.events.some(event => {
+      const eventStart = new Date(event.start)
+      const eventEnd = new Date(event.end)
+      return (start < eventEnd && end > eventStart)
+    })
+  }
+
   function handleDateClick(info: {date: Date}) {
     const clickedDate = info.date
+    
+    if (clickedDate < new Date()) {
+      return
+    }
+
     const timeSlot = calendarData.timeSlots.find((slot) => {
       const slotStart = new Date(slot.start)
       return (
@@ -50,7 +63,7 @@ export default function CalendarDisplay({
       )
     })
 
-    if (timeSlot && timeSlot.available) {
+    if (timeSlot && timeSlot.available && !hasEventConflict(timeSlot.start, timeSlot.end)) {
       setSelectedTimeSlot(timeSlot)
     }
   }
@@ -58,6 +71,10 @@ export default function CalendarDisplay({
   function handleSelect(info: {start: Date; end: Date}) {
     const startDate = info.start
     const endDate = info.end
+
+    if (startDate < new Date() || hasEventConflict(startDate, endDate)) {
+      return
+    }
 
     const newTimeSlot: TimeSlot = {
       id: `temp-${Date.now()}`,
@@ -126,6 +143,10 @@ export default function CalendarDisplay({
         nowIndicator={true}
         selectable={true}
         selectMirror={true}
+        selectAllow={(selectInfo) => {
+          const now = new Date()
+          return selectInfo.start >= now && !hasEventConflict(selectInfo.start, selectInfo.end)
+        }}
         dayMaxEvents={true}
         weekends={true}
       />
