@@ -10,11 +10,13 @@ import EventDetailsModal from './EventDetailsModal';
 interface CalendarDisplayProps {
   calendarData: CalendarData;
   currentDate: Date;
+  onEventCreated: () => void;
 }
 
 export default function CalendarDisplay({
   calendarData,
   currentDate,
+  onEventCreated,
 }: CalendarDisplayProps) {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
     null
@@ -42,14 +44,6 @@ export default function CalendarDisplay({
       borderColor: isBooking ? '#1e88e5' : '#9e9e9e',
     };
   });
-
-  const hasEventConflict = (start: Date, end: Date): boolean => {
-    return calendarData.events.some((event) => {
-      const eventStart = new Date(event.start);
-      const eventEnd = new Date(event.end);
-      return start < eventEnd && end > eventStart;
-    });
-  };
 
   function handleDateClick(info: { date: Date }) {
     const clickedDate = info.date;
@@ -167,8 +161,7 @@ export default function CalendarDisplay({
               'Booking successful! The event has been added to the calendar.'
             );
             setSelectedTimeSlot(null);
-            // Optionally refresh the page to show new booking
-            window.location.reload();
+            onEventCreated();
           }}
         />
       )}

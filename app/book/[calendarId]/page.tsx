@@ -135,6 +135,7 @@ export default function BookingPage({ params }: Props) {
         <CalendarDisplay
           calendarData={calendarData}
           currentDate={currentDate}
+          onEventCreated={() => fetchEvents(calendarId)}
         />
       </div>
     </div>
