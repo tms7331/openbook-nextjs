@@ -3,8 +3,9 @@ import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import { useEffect, useRef, useState } from 'react';
-import { CalendarData, TimeSlot } from '../types/calendar';
+import { CalendarData, CalendarEvent, TimeSlot } from '../types/calendar';
 import BookingModal from './BookingModal';
+import EventDetailsModal from './EventDetailsModal';
 
 interface CalendarDisplayProps {
   calendarData: CalendarData;
@@ -16,6 +17,9 @@ export default function CalendarDisplay({
   currentDate,
 }: CalendarDisplayProps) {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
+    null
+  );
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
   const calendarRef = useRef<FullCalendar>(null);
@@ -73,6 +77,15 @@ export default function CalendarDisplay({
     setSelectedTimeSlot(newTimeSlot);
   }
 
+  function handleEventClick(info: { event: { id: string } }) {
+    const clickedEvent = calendarData.events.find(
+      (event) => event.id === info.event.id
+    );
+    if (clickedEvent) {
+      setSelectedEvent(clickedEvent);
+    }
+  }
+
   return (
     <div
       css={{
@@ -117,6 +130,7 @@ export default function CalendarDisplay({
         events={events}
         dateClick={handleDateClick}
         select={handleSelect}
+        eventClick={handleEventClick}
         headerToolbar={{
           left: '',
           center: '',
@@ -156,6 +170,13 @@ export default function CalendarDisplay({
             // Optionally refresh the page to show new booking
             window.location.reload();
           }}
+        />
+      )}
+
+      {selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
         />
       )}
     </div>
