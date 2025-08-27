@@ -139,6 +139,7 @@ function BookingPageContent({ params }: Props) {
           calendarData={calendarData}
           currentDate={currentDate}
           isAdmin={isAdmin}
+          onEventCreated={() => fetchEvents(calendarId)}
           onEventDelete={async (eventId: string) => {
             try {
               const response = await fetch(`/api/bookings/${eventId}?calendarId=${calendarId}`, {
