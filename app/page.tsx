@@ -9,8 +9,7 @@ export default function HomePage() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#f5f5f5'
+      justifyContent: 'center'
     }}>
       <div style={{
         textAlign: 'center',
