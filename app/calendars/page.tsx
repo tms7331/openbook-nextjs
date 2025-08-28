@@ -3,6 +3,9 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/Navbar";
+import { Calendar } from "lucide-react";
 
 function CalendarsList() {
   const [calendars, setCalendars] = useState<Array<{id: string; summary?: string; description?: string}>>([]);
@@ -59,112 +62,96 @@ function CalendarsList() {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem' }}>Meeting Room Calendars</h1>
-        {isAdmin && (
-          <Link href="/create-calendar">
-            <button style={{
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '1rem'
-            }}>
-              + Create New Calendar
-            </button>
-          </Link>
-        )}
-      </div>
-
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>Loading calendars...</div>
-      ) : calendars.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '3rem',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '8px'
-        }}>
-          <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>No calendars yet</p>
+    <>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex justify-between items-center mb-12">
+          <div>
+            <h1 className="text-4xl font-bold text-white/80 mb-6 text-balance">Meeting Room Calendars</h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-2xl text-pretty">
+              Select a room to book your meeting time
+            </p>
+          </div>
           {isAdmin && (
             <Link href="/create-calendar">
-              <button style={{
-                backgroundColor: '#2196f3',
-                color: 'white',
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}>
-                Create Your First Calendar
-              </button>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 text-lg">
+                + Create New Calendar
+              </Button>
             </Link>
           )}
         </div>
-      ) : (
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          {calendars.map((calendar) => (
-            <div key={calendar.id} style={{
-              padding: '1.5rem',
-              backgroundColor: 'white',
-              border: '2px solid #e0e0e0',
-              borderRadius: '8px',
-              transition: 'all 0.2s',
-              cursor: 'pointer'
-            }}>
-              <h3 style={{ marginBottom: '0.5rem', color: '#000' }}>{calendar.summary || 'Unnamed Calendar'}</h3>
-              {calendar.description && (
-                <p style={{ color: '#333', marginBottom: '1rem' }}>{calendar.description}</p>
-              )}
-              <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>
-                ID: {calendar.id}
+
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="text-white/70 text-lg">Loading calendars...</div>
+          </div>
+        ) : calendars.length === 0 ? (
+          <div className="bg-white/10 backdrop-blur rounded-xl p-12 text-center">
+            <Calendar className="w-16 h-16 text-white/60 mx-auto mb-4" />
+            <p className="text-xl text-white/80 mb-6">No calendars yet</p>
+            {isAdmin && (
+              <Link href="/create-calendar">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3">
+                  Create Your First Calendar
+                </Button>
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {calendars.map((calendar) => (
+              <div
+                key={calendar.id}
+                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <div className="flex flex-col space-y-4">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                      {calendar.summary || 'Unnamed Calendar'}
+                    </h2>
+                    {calendar.description && (
+                      <p className="text-gray-600 mb-3">{calendar.description}</p>
+                    )}
+                    <p className="text-sm text-gray-500 font-mono break-all">
+                      ID: {calendar.id}
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <Link href={`/book/${calendar.id}`}>
+                      <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2">
+                        Book a Time Slot
+                      </Button>
+                    </Link>
+                    {isAdmin && (
+                      <Button
+                        className="bg-red-500 hover:bg-red-600 text-white px-6 py-2"
+                        onClick={() => deleteCalendar(calendar.id)}
+                        disabled={deletingCalendar === calendar.id}
+                      >
+                        {deletingCalendar === calendar.id ? 'Deleting...' : 'Delete'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Link href={`/book/${calendar.id}`}>
-                  <button style={{
-                    backgroundColor: '#2196f3',
-                    color: 'white',
-                    padding: '0.5rem 1rem',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer'
-                  }}>
-                    Book a Time Slot
-                  </button>
-                </Link>
-                {isAdmin && (
-                  <button
-                    onClick={() => deleteCalendar(calendar.id)}
-                    disabled={deletingCalendar === calendar.id}
-                    style={{
-                      backgroundColor: deletingCalendar === calendar.id ? '#999' : '#f44336',
-                      color: 'white',
-                      padding: '0.5rem 1rem',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: deletingCalendar === calendar.id ? 'not-allowed' : 'pointer',
-                      opacity: deletingCalendar === calendar.id ? 0.7 : 1,
-                    }}
-                  >
-                    {deletingCalendar === calendar.id ? 'Deleting...' : 'Delete'}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </>
   );
 }
 
 export default function CalendarsPage() {
   return (
-    <Suspense fallback={<div style={{ textAlign: 'center', padding: '2rem' }}>Loading...</div>}>
-      <CalendarsList />
-    </Suspense>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navbar showBackButton={true} />
+      <Suspense fallback={
+        <div className="text-center py-12">
+          <div className="text-white/70 text-lg">Loading...</div>
+        </div>
+      }>
+        <CalendarsList />
+      </Suspense>
+    </div>
   );
 }

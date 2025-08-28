@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Navbar } from "@/components/Navbar";
 
 export default function CreateCalendarPage() {
   const [name, setName] = useState('');
@@ -34,87 +38,74 @@ export default function CreateCalendarPage() {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Create New Calendar</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navbar showBackButton={true} />
       
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-          Calendar Name *
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., Conference Room A"
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            fontSize: '1rem',
-            border: '2px solid #e0e0e0',
-            borderRadius: '8px'
-          }}
-        />
-      </div>
-
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-          Description (optional)
-        </label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="e.g., Main conference room with projector"
-          rows={3}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            fontSize: '1rem',
-            border: '2px solid #e0e0e0',
-            borderRadius: '8px',
-            resize: 'vertical'
-          }}
-        />
-      </div>
-
-      <button
-        onClick={createCalendar}
-        disabled={!name || loading}
-        style={{
-          backgroundColor: name && !loading ? '#2196f3' : '#ccc',
-          color: 'white',
-          padding: '0.75rem 2rem',
-          fontSize: '1rem',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: name && !loading ? 'pointer' : 'not-allowed',
-          width: '100%'
-        }}
-      >
-        {loading ? 'Creating...' : 'Create Calendar'}
-      </button>
-
-      {result && (
-        <div style={{
-          marginTop: '2rem',
-          padding: '1rem',
-          backgroundColor: result.error ? '#ffebee' : '#e8f5e9',
-          border: `1px solid ${result.error ? '#ffcdd2' : '#c8e6c9'}`,
-          borderRadius: '8px'
-        }}>
-          {result.error ? (
-            <div style={{ color: '#c62828' }}>
-              <strong>Error:</strong> {result.error}
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-xl p-8 shadow-lg">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Calendar</h1>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Calendar Name *
+              </label>
+              <Input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g., Conference Room A"
+                className="w-full"
+              />
             </div>
-          ) : (
-            <div style={{ color: '#2e7d32' }}>
-              <strong>Success!</strong> Calendar created
-              <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                <strong>Calendar ID:</strong> {result.id}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description (optional)
+              </label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g., Main conference room with projector"
+                rows={3}
+                className="w-full"
+              />
+            </div>
+
+            <Button
+              onClick={createCalendar}
+              disabled={!name || loading}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 text-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Creating...' : 'Create Calendar'}
+            </Button>
+
+            {result && (
+              <div className={`rounded-lg p-4 ${
+                result.error 
+                  ? 'bg-red-50 border border-red-200' 
+                  : 'bg-green-50 border border-green-200'
+              }`}>
+                {result.error ? (
+                  <div className="text-red-700">
+                    <strong>Error:</strong> {result.error}
+                  </div>
+                ) : (
+                  <div className="text-green-700">
+                    <strong>Success!</strong> Calendar created
+                    <div className="mt-2 text-sm">
+                      <strong>Calendar ID:</strong> 
+                      <code className="ml-2 px-2 py-1 bg-gray-100 rounded text-xs break-all">
+                        {result.id}
+                      </code>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      )}
+      </main>
     </div>
   );
 }
