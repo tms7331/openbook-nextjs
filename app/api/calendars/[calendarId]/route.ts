@@ -48,6 +48,7 @@ export async function DELETE(
       } catch (listError) {
         // If we can't get it from calendar list, try to delete anyway
         console.log('Could not get calendar from list, attempting delete anyway');
+        console.log('listError', listError);
       }
 
       if (accessRole !== 'owner' && accessRole !== 'unknown') {
