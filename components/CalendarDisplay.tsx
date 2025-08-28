@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -44,8 +43,8 @@ export default function CalendarDisplay({
       title: event.title,
       start: event.start,
       end: event.end,
-      backgroundColor: isBooking ? '#2196f3' : '#bdbdbd',
-      borderColor: isBooking ? '#1e88e5' : '#9e9e9e',
+      backgroundColor: isBooking ? '#8b5cf6' : '#94a3b8',
+      borderColor: isBooking ? '#7c3aed' : '#64748b',
     };
   });
 
@@ -84,42 +83,60 @@ export default function CalendarDisplay({
     }
   }
 
+  // Get current hour for scroll position
+  const currentHour = new Date().getHours();
+  const scrollTime = currentHour > 1 ? `${String(currentHour - 1).padStart(2, '0')}:00:00` : '08:00:00';
+
   return (
-    <div
-      css={{
-        '& .fc': {
-          fontFamily:
-            'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          fontSize: '14px',
-        },
-        '& .fc-theme-standard td': {
-          borderColor: '#90caf9',
-        },
-        '& .fc-theme-standard th': {
-          borderColor: '#90caf9',
-          backgroundColor: '#e3f2fd',
-          color: '#1565c0',
-          fontWeight: '600',
-        },
-        '& .fc-daygrid-day': {
-          '&:hover': {
-            backgroundColor: '#e3f2fd',
-            cursor: 'pointer',
-          },
-        },
-        '& .fc-today': {
-          backgroundColor: '#bbdefb !important',
-        },
-        '& .fc-button-primary': {
-          backgroundColor: '#1e88e5',
-          borderColor: '#1e88e5',
-          '&:hover': {
-            backgroundColor: '#1976d2',
-            borderColor: '#1976d2',
-          },
-        },
-      }}
-    >
+    <div className="fc-calendar-wrapper">
+      <style jsx global>{`
+        .fc-calendar-wrapper .fc {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-size: 14px;
+        }
+        .fc-calendar-wrapper .fc-theme-standard td {
+          border-color: #e2e8f0;
+        }
+        .fc-calendar-wrapper .fc-theme-standard th {
+          border-color: #e2e8f0;
+          background-color: #f8f9ff;
+          color: #7c3aed;
+          font-weight: 600;
+        }
+        .fc-calendar-wrapper .fc-timegrid-slot {
+          height: 3em;
+        }
+        .fc-calendar-wrapper .fc-timegrid-slot:hover {
+          background-color: #f3e8ff;
+          cursor: pointer;
+        }
+        .fc-calendar-wrapper .fc-today {
+          background-color: #faf5ff !important;
+        }
+        .fc-calendar-wrapper .fc-button-primary {
+          background-color: #8b5cf6;
+          border-color: #8b5cf6;
+        }
+        .fc-calendar-wrapper .fc-button-primary:hover {
+          background-color: #7c3aed;
+          border-color: #7c3aed;
+        }
+        .fc-calendar-wrapper .fc-event {
+          border-radius: 4px;
+          padding: 2px 4px;
+        }
+        .fc-calendar-wrapper .fc-timegrid-now-indicator-line {
+          border-color: #ef4444;
+          border-width: 2px;
+        }
+        .fc-calendar-wrapper .fc-col-header-cell {
+          padding: 12px;
+        }
+        .fc-calendar-wrapper .fc-timegrid-axis {
+          padding-right: 8px;
+        }
+      `}</style>
+      
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, interactionPlugin]}
@@ -149,6 +166,13 @@ export default function CalendarDisplay({
         selectOverlap={false}
         dayMaxEvents={true}
         weekends={true}
+        scrollTime={scrollTime}
+        businessHours={{
+          daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+          startTime: '08:00',
+          endTime: '20:00',
+        }}
+        editable={false}
       />
 
       {selectedTimeSlot && (

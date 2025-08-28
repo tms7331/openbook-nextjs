@@ -1,6 +1,9 @@
-/** @jsxImportSource @emotion/react */
 import { TimeSlot, UserDetails } from '../types/calendar'
 import React, { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { X } from "lucide-react"
 
 interface BookingModalProps {
   timeSlot: TimeSlot
@@ -72,244 +75,98 @@ export default function BookingModal({
 
   return (
     <div
-      css={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px',
-        zIndex: 1000,
-      }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[1000]"
       onClick={onClose}
     >
       <div
-        css={{
-          backgroundColor: '#fafafa',
-          borderRadius: '12px',
-          padding: '16px',
-          width: '100%',
-          maxWidth: '500px',
-          maxHeight: '90vh',
-          overflow: 'auto',
-        }}
+        className="bg-white rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div css={{ marginBottom: '24px' }}>
-          <h2
-            css={{
-              fontSize: '24px',
-              fontWeight: '600',
-              color: '#212121',
-              margin: 0,
-              marginBottom: '8px',
-            }}
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Book Meeting Room
+            </h2>
+            <p className="text-gray-600">
+              {formatTime(timeSlot.start)} - {formatTime(timeSlot.end)}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            Book It
-          </h2>
-          <p
-            css={{
-              fontSize: '16px',
-              color: '#757575',
-              margin: 0,
-            }}
-          >
-            {formatTime(timeSlot.start)} - {formatTime(timeSlot.end)}
-          </p>
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div css={{ marginBottom: '16px' }}>
-            <label
-              css={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#616161',
-                marginBottom: '4px',
-              }}
-            >
-              Title *
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Meeting Title *
             </label>
-            <input
-              type='text'
+            <Input
+              type="text"
               required
               value={userDetails.name}
               onChange={(e) =>
                 setUserDetails({ ...userDetails, name: e.target.value })
               }
-              css={{
-                width: '100%',
-                padding: '16px',
-                fontSize: '16px',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                backgroundColor: 'white',
-                color: '#212121',
-                '&:focus': {
-                  outline: 'none',
-                  borderColor: '#2196f3',
-                  boxShadow: '0 0 0 3px #bbdefb',
-                },
-                '&::placeholder': {
-                  color: '#9e9e9e',
-                },
-              }}
+              placeholder="e.g., Team Standup"
+              className="w-full"
             />
           </div>
 
-          <div css={{ marginBottom: '16px' }}>
-            <label
-              css={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#616161',
-                marginBottom: '4px',
-              }}
-            >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Email (optional - for confirmation)
             </label>
-            <input
-              type='email'
+            <Input
+              type="email"
               value={userDetails.email}
               onChange={(e) =>
                 setUserDetails({ ...userDetails, email: e.target.value })
               }
-              placeholder='your@email.com'
-              css={{
-                width: '100%',
-                padding: '16px',
-                fontSize: '16px',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                backgroundColor: 'white',
-                color: '#212121',
-                '&:focus': {
-                  outline: 'none',
-                  borderColor: '#2196f3',
-                  boxShadow: '0 0 0 3px #bbdefb',
-                },
-                '&::placeholder': {
-                  color: '#9e9e9e',
-                },
-              }}
+              placeholder="your@email.com"
+              className="w-full"
             />
           </div>
 
-          <div css={{ marginBottom: '24px' }}>
-            <label
-              css={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#616161',
-                marginBottom: '4px',
-              }}
-            >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Notes (optional)
             </label>
-            <textarea
+            <Textarea
               rows={3}
               value={userDetails.notes}
               onChange={(e) =>
                 setUserDetails({ ...userDetails, notes: e.target.value })
               }
-              css={{
-                width: '100%',
-                padding: '16px',
-                fontSize: '16px',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                resize: 'vertical',
-                minHeight: '80px',
-                backgroundColor: 'white',
-                color: '#212121',
-                '&:focus': {
-                  outline: 'none',
-                  borderColor: '#2196f3',
-                  boxShadow: '0 0 0 3px #bbdefb',
-                },
-                '&::placeholder': {
-                  color: '#9e9e9e',
-                },
-              }}
+              placeholder="Add any additional details..."
+              className="w-full"
             />
           </div>
 
           {error && (
-            <div css={{
-              marginBottom: '16px',
-              padding: '12px',
-              backgroundColor: '#ffebee',
-              color: '#c62828',
-              borderRadius: '8px',
-              fontSize: '14px'
-            }}>
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
               {error}
             </div>
           )}
 
-          <div
-            css={{
-              display: 'flex',
-              gap: '16px',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <button
-              type='button'
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
-              css={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                padding: '8px 16px',
-                fontSize: '14px',
-                fontWeight: '500',
-                backgroundColor: 'transparent',
-                color: '#757575',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                '&:hover': {
-                  backgroundColor: '#f5f5f5',
-                },
-              }}
             >
               Cancel
-            </button>
-            <button
-              type='submit'
-              css={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                padding: '8px 16px',
-                fontSize: '14px',
-                fontWeight: '500',
-                backgroundColor: '#2196f3',
-                color: '#fafafa',
-                border: 'none',
-                borderRadius: '8px',
-                '&:hover': {
-                  backgroundColor: '#1e88e5',
-                },
-                '&:disabled': {
-                  backgroundColor: '#bdbdbd',
-                  cursor: 'not-allowed',
-                },
-              }}
+            </Button>
+            <Button
+              type="submit"
               disabled={!userDetails.name || loading}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               {loading ? 'Booking...' : 'Confirm Booking'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -2,9 +2,11 @@
 
 import CalendarDisplay from '@/components/CalendarDisplay';
 import CalendarNavigation from '@/components/CalendarNavigation';
+import { Navbar } from '@/components/Navbar';
 import { CalendarData } from '@/types/calendar';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Calendar } from 'lucide-react';
 
 interface Props {
   params: Promise<{ calendarId: string }>;
@@ -34,26 +36,15 @@ function CalendarName({ calendarId }: { calendarId: string }) {
 
   if (loading) {
     return (
-      <h1 style={{
-        fontSize: '2.5rem',
-        textAlign: 'center',
-        marginBottom: '2rem',
-        color: '#333',
-        fontWeight: 'bold'
-      }}>
-        Loading calendar name...
-      </h1>
+      <div className="flex items-center justify-center space-x-2 text-white/70">
+        <Calendar className="w-5 h-5 animate-pulse" />
+        <span>Loading calendar name...</span>
+      </div>
     );
   }
 
   return (
-    <h1 style={{
-      fontSize: '2.5rem',
-      textAlign: 'center',
-      marginBottom: '2rem',
-      color: '#333',
-      fontWeight: 'bold'
-    }}>
+    <h1 className="text-3xl font-bold text-white text-center">
       {calendarName}
     </h1>
   );
@@ -111,61 +102,70 @@ function BookingPageContent({ params }: Props) {
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        Loading calendar...
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Calendar className="w-12 h-12 text-white/60 mx-auto mb-4 animate-pulse" />
+          <p className="text-white/70 text-lg">Loading calendar...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-      <CalendarName calendarId={calendarId} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navbar showBackButton={true} />
+      
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <CalendarName calendarId={calendarId} />
+        </div>
 
-      <div
-        style={{
-          backgroundColor: '#fafafa',
-          borderRadius: '12px',
-          padding: 0,
-          minHeight: '80vh',
-          boxShadow: '0 4px 6px -1px rgba(33, 150, 243, 0.12)',
-          overflow: 'hidden',
-        }}
-      >
-        <CalendarNavigation
-          currentDate={currentDate}
-          onDateChange={setCurrentDate}
-        />
-        <CalendarDisplay
-          calendarData={calendarData}
-          currentDate={currentDate}
-          isAdmin={isAdmin}
-          onEventCreated={() => fetchEvents(calendarId)}
-          onEventDelete={async (eventId: string) => {
-            try {
-              const response = await fetch(`/api/bookings/${eventId}?calendarId=${calendarId}`, {
-                method: 'DELETE',
-              });
-              if (response.ok) {
-                // Refresh events after deletion
-                await fetchEvents(calendarId);
-              } else {
-                const error = await response.json();
-                alert(`Failed to delete event: ${error.message || error.error}`);
-              }
-            } catch (error) {
-              console.error('Failed to delete event:', error);
-              alert('Failed to delete event');
-            }
-          }}
-        />
-      </div>
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <CalendarNavigation
+            currentDate={currentDate}
+            onDateChange={setCurrentDate}
+          />
+          <div className="p-4">
+            <CalendarDisplay
+              calendarData={calendarData}
+              currentDate={currentDate}
+              isAdmin={isAdmin}
+              onEventCreated={() => fetchEvents(calendarId)}
+              onEventDelete={async (eventId: string) => {
+                try {
+                  const response = await fetch(`/api/bookings/${eventId}?calendarId=${calendarId}`, {
+                    method: 'DELETE',
+                  });
+                  if (response.ok) {
+                    // Refresh events after deletion
+                    await fetchEvents(calendarId);
+                  } else {
+                    const error = await response.json();
+                    alert(`Failed to delete event: ${error.message || error.error}`);
+                  }
+                } catch (error) {
+                  console.error('Failed to delete event:', error);
+                  alert('Failed to delete event');
+                }
+              }}
+            />
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
 
 export default function BookingPage({ params }: Props) {
   return (
-    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Calendar className="w-12 h-12 text-white/60 mx-auto mb-4 animate-pulse" />
+          <p className="text-white/70 text-lg">Loading...</p>
+        </div>
+      </div>
+    }>
       <BookingPageContent params={params} />
     </Suspense>
   );

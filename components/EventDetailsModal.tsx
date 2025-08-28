@@ -1,6 +1,7 @@
-/** @jsxImportSource @emotion/react */
 import { CalendarEvent } from '../types/calendar'
 import React from 'react'
+import { Button } from "@/components/ui/button"
+import { Calendar, Clock, Tag, X } from "lucide-react"
 
 interface EventDetailsModalProps {
   event: CalendarEvent
@@ -16,6 +17,7 @@ export default function EventDetailsModal({
   onDelete,
 }: EventDetailsModalProps) {
   const [isDeleting, setIsDeleting] = React.useState(false)
+  
   function formatTime(date: Date) {
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
@@ -35,172 +37,82 @@ export default function EventDetailsModal({
 
   return (
     <div
-      css={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px',
-        zIndex: 1000,
-      }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[1000]"
       onClick={onClose}
     >
       <div
-        css={{
-          backgroundColor: '#fafafa',
-          borderRadius: '12px',
-          padding: '24px',
-          width: '100%',
-          maxWidth: '400px',
-          maxHeight: '90vh',
-          overflow: 'auto',
-        }}
+        className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div css={{ marginBottom: '24px' }}>
-          <h2
-            css={{
-              fontSize: '24px',
-              fontWeight: '600',
-              color: '#212121',
-              margin: 0,
-              marginBottom: '8px',
-            }}
-          >
+        <div className="flex justify-between items-start mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">
             Event Details
           </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <div css={{ marginBottom: '16px' }}>
-          <label
-            css={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#616161',
-              marginBottom: '4px',
-            }}
-          >
-            Title
-          </label>
-          <div
-            css={{
-              padding: '12px',
-              fontSize: '16px',
-              backgroundColor: 'white',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              color: '#212121',
-            }}
-          >
-            {event.title}
+        <div className="space-y-4">
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+              <Calendar className="w-4 h-4" />
+              Title
+            </label>
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+              {event.title}
+            </div>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+              <Calendar className="w-4 h-4" />
+              Date
+            </label>
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+              {formatDate(event.start)}
+            </div>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+              <Clock className="w-4 h-4" />
+              Time
+            </label>
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+              {formatTime(event.start)} - {formatTime(event.end)}
+            </div>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+              <Tag className="w-4 h-4" />
+              Type
+            </label>
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <span className="inline-flex items-center gap-2">
+                <span 
+                  className={`w-3 h-3 rounded-full ${
+                    event.type === 'booking' ? 'bg-purple-600' : 'bg-gray-400'
+                  }`}
+                />
+                <span className="text-gray-900">
+                  {event.type === 'booking' ? 'Booking' : 'Blocked Time'}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
 
-        <div css={{ marginBottom: '16px' }}>
-          <label
-            css={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#616161',
-              marginBottom: '4px',
-            }}
-          >
-            Date
-          </label>
-          <div
-            css={{
-              padding: '12px',
-              fontSize: '16px',
-              backgroundColor: 'white',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              color: '#212121',
-            }}
-          >
-            {formatDate(event.start)}
-          </div>
-        </div>
-
-        <div css={{ marginBottom: '16px' }}>
-          <label
-            css={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#616161',
-              marginBottom: '4px',
-            }}
-          >
-            Time
-          </label>
-          <div
-            css={{
-              padding: '12px',
-              fontSize: '16px',
-              backgroundColor: 'white',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              color: '#212121',
-            }}
-          >
-            {formatTime(event.start)} - {formatTime(event.end)}
-          </div>
-        </div>
-
-        <div css={{ marginBottom: '24px' }}>
-          <label
-            css={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#616161',
-              marginBottom: '4px',
-            }}
-          >
-            Type
-          </label>
-          <div
-            css={{
-              padding: '12px',
-              fontSize: '16px',
-              backgroundColor: 'white',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              color: '#212121',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span
-              css={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: event.type === 'booking' ? '#2196f3' : '#bdbdbd',
-              }}
-            />
-            {event.type === 'booking' ? 'Booking' : 'Blocked Time'}
-          </div>
-        </div>
-
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: isAdmin && onDelete ? 'space-between' : 'flex-end',
-            gap: '12px',
-          }}
-        >
+        <div className={`flex gap-3 mt-6 ${
+          isAdmin && onDelete ? 'justify-between' : 'justify-end'
+        }`}>
           {isAdmin && onDelete && (
-            <button
-              type='button'
+            <Button
+              variant="destructive"
               onClick={async () => {
                 if (confirm('Are you sure you want to delete this event?')) {
                   setIsDeleting(true)
@@ -214,47 +126,16 @@ export default function EventDetailsModal({
                 }
               }}
               disabled={isDeleting}
-              css={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                cursor: isDeleting ? 'not-allowed' : 'pointer',
-                padding: '12px 24px',
-                fontSize: '14px',
-                fontWeight: '500',
-                backgroundColor: isDeleting ? '#999' : '#f44336',
-                color: '#fafafa',
-                border: 'none',
-                borderRadius: '8px',
-                opacity: isDeleting ? 0.7 : 1,
-                '&:hover': {
-                  backgroundColor: isDeleting ? '#999' : '#e53935',
-                },
-              }}
             >
               {isDeleting ? 'Deleting...' : 'Delete Event'}
-            </button>
+            </Button>
           )}
-          <button
-            type='button'
+          <Button
             onClick={onClose}
-            css={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              padding: '12px 24px',
-              fontSize: '14px',
-              fontWeight: '500',
-              backgroundColor: '#2196f3',
-              color: '#fafafa',
-              border: 'none',
-              borderRadius: '8px',
-              '&:hover': {
-                backgroundColor: '#1e88e5',
-              },
-            }}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
           >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>
