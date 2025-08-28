@@ -58,23 +58,6 @@ export default function HomePage() {
               📅 View Meeting Rooms
             </button>
           </Link>
-
-          <Link href="/create-calendar">
-            <button style={{
-              width: '100%',
-              padding: '1rem 2rem',
-              fontSize: '1.1rem',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '500',
-              transition: 'background-color 0.2s'
-            }}>
-              ➕ Create New Calendar
-            </button>
-          </Link>
         </div>
 
         <div style={{
