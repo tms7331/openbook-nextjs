@@ -121,6 +121,11 @@ function CalendarsList() {
                         Book a Time Slot
                       </Button>
                     </Link>
+                    <Link href={`/book/${calendar.id}/qr`}>
+                      <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2">
+                        View QR
+                      </Button>
+                    </Link>
                     {isAdmin && (
                       <Button
                         className="bg-red-500 hover:bg-red-600 text-white px-6 py-2"

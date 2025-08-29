@@ -73,7 +73,7 @@ export default function QRPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <Calendar className="w-12 h-12 text-white/60 mx-auto mb-4 animate-pulse" />
-          <p className="text-white/70 text-lg">Loading calendar...</p>
+          <p className="text-white/70 text-lg">Loading QR code...</p>
         </div>
       </div>
     );
