@@ -4,9 +4,9 @@ import CalendarDisplay from '@/components/CalendarDisplay';
 import CalendarNavigation from '@/components/CalendarNavigation';
 import { Navbar } from '@/components/Navbar';
 import { CalendarData } from '@/types/calendar';
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { Calendar } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
 interface Props {
   params: Promise<{ calendarId: string }>;
@@ -112,20 +112,20 @@ function BookingPageContent({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <Navbar showBackButton={true} />
-      
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+    <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900'>
+      <Navbar />
+
+      <main className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+        <div className='mb-8'>
           <CalendarName calendarId={calendarId} />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className='bg-white rounded-2xl shadow-2xl overflow-hidden'>
           <CalendarNavigation
             currentDate={currentDate}
             onDateChange={setCurrentDate}
           />
-          <div className="p-4">
+          <div className='p-4'>
             <CalendarDisplay
               calendarData={calendarData}
               currentDate={currentDate}
@@ -133,15 +133,20 @@ function BookingPageContent({ params }: Props) {
               onEventCreated={() => fetchEvents(calendarId)}
               onEventDelete={async (eventId: string) => {
                 try {
-                  const response = await fetch(`/api/bookings/${eventId}?calendarId=${calendarId}`, {
-                    method: 'DELETE',
-                  });
+                  const response = await fetch(
+                    `/api/bookings/${eventId}?calendarId=${calendarId}`,
+                    {
+                      method: 'DELETE',
+                    }
+                  );
                   if (response.ok) {
                     // Refresh events after deletion
                     await fetchEvents(calendarId);
                   } else {
                     const error = await response.json();
-                    alert(`Failed to delete event: ${error.message || error.error}`);
+                    alert(
+                      `Failed to delete event: ${error.message || error.error}`
+                    );
                   }
                 } catch (error) {
                   console.error('Failed to delete event:', error);

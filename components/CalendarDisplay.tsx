@@ -85,13 +85,20 @@ export default function CalendarDisplay({
 
   // Get current hour for scroll position
   const currentHour = new Date().getHours();
-  const scrollTime = currentHour > 1 ? `${String(currentHour - 1).padStart(2, '0')}:00:00` : '08:00:00';
+  const scrollTime =
+    currentHour > 1
+      ? `${String(currentHour - 1).padStart(2, '0')}:00:00`
+      : '08:00:00';
 
   return (
-    <div className="fc-calendar-wrapper">
-      <style jsx global>{`
+    <div className='fc-calendar-wrapper'>
+      <style
+        jsx
+        global
+      >{`
         .fc-calendar-wrapper .fc {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+            Roboto, sans-serif;
           font-size: 14px;
         }
         .fc-calendar-wrapper .fc-theme-standard td {
@@ -136,7 +143,7 @@ export default function CalendarDisplay({
           padding-right: 8px;
         }
       `}</style>
-      
+
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, interactionPlugin]}
@@ -152,6 +159,7 @@ export default function CalendarDisplay({
           right: '',
         }}
         height='auto'
+        dragScroll={false}
         slotMinTime='08:00:00'
         slotMaxTime='22:00:00'
         slotDuration='00:30:00'
@@ -173,6 +181,9 @@ export default function CalendarDisplay({
           endTime: '20:00',
         }}
         editable={false}
+        longPressDelay={150}
+        selectLongPressDelay={150}
+        eventLongPressDelay={150}
       />
 
       {selectedTimeSlot && (

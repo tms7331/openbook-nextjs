@@ -149,8 +149,6 @@ export async function GET(request: Request, { params }: Props) {
       calendarId: calendarId
     });
 
-    console.log('Calendar metadata response:', response.data);
-
     return NextResponse.json({
       authMethod: 'service-account',
       calendar: response.data
