@@ -4,6 +4,9 @@ A modern, easy-to-use meeting room booking application with QR code support for 
 
 ## Features
 
+Book AI Conference room: https://ft0.sh/book-ai-conf-stairs
+Book 3rd Floor conference room: https://ft0.sh/book-3rd-conf-kitchen
+
 ### 📅 Room Booking
 - View available meeting rooms and their schedules
 - Book time slots with a visual calendar interface
@@ -72,16 +75,13 @@ npm run dev
 3. Users can scan to instantly access that room's booking page
 
 ### For Administrators
+**See Thomas or Kelly for access to manage live site**
 1. Create new room calendars from the admin interface
 2. Delete calendars or individual bookings as needed
 
 ## Key Pages
-
-- `/` - Homepage
-- `/calendars` - View all meeting rooms
 - `/book/[calendarId]` - Book a specific room
 - `/book/[calendarId]/qr` - QR code for a specific room
-- `/create-calendar` - Create new room calendar (admin only)
 
 ## Support
 
