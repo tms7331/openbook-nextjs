@@ -8,7 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import { Calendar } from "lucide-react";
 
 function CalendarsList() {
-  const [calendars, setCalendars] = useState<Array<{id: string; summary?: string; description?: string}>>([]);
+  const [calendars, setCalendars] = useState<Array<{ id: string; summary?: string; description?: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [deletingCalendar, setDeletingCalendar] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -42,14 +42,14 @@ function CalendarsList() {
       const response = await fetch(`/api/calendars/${calendarId}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
         alert('Calendar deleted successfully');
         await fetchCalendars();
       } else {
         const error = await response.json();
-        const errorMessage = error.hint 
-          ? `${error.message}\n\n${error.hint}` 
+        const errorMessage = error.hint
+          ? `${error.message}\n\n${error.hint}`
           : error.message || error.error;
         alert(`Failed to delete calendar:\n${errorMessage}`);
       }
@@ -111,9 +111,6 @@ function CalendarsList() {
                     {calendar.description && (
                       <p className="text-gray-600 mb-3">{calendar.description}</p>
                     )}
-                    <p className="text-sm text-gray-500 font-mono break-all">
-                      ID: {calendar.id}
-                    </p>
                   </div>
                   <div className="flex gap-3">
                     <Link href={`/book/${calendar.id}`}>
