@@ -20,7 +20,7 @@
     "dotenv": "^17.2.1",
     "googleapis": "^157.0.0",
     "lucide-react": "^0.542.0",
-    "next": "15.5.0",
+    "next": "^15.5.7",
     "qr-code-styling": "^1.9.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
