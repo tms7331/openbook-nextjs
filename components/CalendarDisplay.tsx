@@ -83,12 +83,28 @@ export default function CalendarDisplay({
     }
   }
 
-  // Get current hour for scroll position
-  const currentHour = new Date().getHours();
-  const scrollTime =
-    currentHour > 1
-      ? `${String(currentHour - 1).padStart(2, '0')}:00:00`
-      : '08:00:00';
+  // Calculate dynamic time range based on displayed date
+  const now = new Date();
+  const isToday = currentDate.toDateString() === now.toDateString();
+  
+  let minHour, maxHour, scrollHour;
+  
+  if (isToday) {
+    // For today: 2 hours past to 5 hours future minimum
+    const currentHour = now.getHours();
+    minHour = Math.max(6, currentHour - 2);
+    maxHour = Math.max(currentHour + 5, 18);
+    scrollHour = Math.max(minHour, currentHour - 1);
+  } else {
+    // For other days: show full business hours
+    minHour = 8;
+    maxHour = 22;
+    scrollHour = 8;
+  }
+  
+  const slotMinTime = `${String(minHour).padStart(2, '0')}:00:00`;
+  const slotMaxTime = `${String(maxHour).padStart(2, '0')}:00:00`;
+  const scrollTime = `${String(scrollHour).padStart(2, '0')}:00:00`;
 
   return (
     <div className='fc-calendar-wrapper'>
@@ -160,8 +176,8 @@ export default function CalendarDisplay({
         }}
         height='auto'
         dragScroll={false}
-        slotMinTime='08:00:00'
-        slotMaxTime='22:00:00'
+        slotMinTime={slotMinTime}
+        slotMaxTime={slotMaxTime}
         slotDuration='00:30:00'
         snapDuration='00:15:00'
         allDaySlot={false}
@@ -178,7 +194,7 @@ export default function CalendarDisplay({
         businessHours={{
           daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
           startTime: '08:00',
-          endTime: '20:00',
+          endTime: '23:00',
         }}
         editable={false}
         longPressDelay={150}

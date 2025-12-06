@@ -20,7 +20,7 @@ export function Navbar({
         <span className='font-bold text-xl text-white'>Book Meeting Room</span>
         <div className='flex items-center space-x-4'>
           {showBackButton && (
-            <Link href='/'>
+            <Link href='/calendars'>
               <Button
                 variant='outline'
                 size='sm'
